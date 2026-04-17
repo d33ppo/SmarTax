@@ -1,0 +1,31 @@
+{
+  "app": {
+    "name": "TaxPilot",
+    "tagline": "Cari setiap ringgit yang anda layak terima."
+  },
+  "nav": {
+    "dashboard": "Papan Pemuka",
+    "chat": "Tanya TaxPilot",
+    "login": "Log masuk",
+    "signup": "Mulakan percuma"
+  },
+  "landing": {
+    "hero_title": "Berhenti tinggalkan wang atas meja.",
+    "hero_subtitle": "Rakyat Malaysia biasanya hanya menuntut 4 daripada 18 pelepasan cukai tersedia. TaxPilot cari setiap ringgit anda — dengan rujukan LHDN.",
+    "cta_primary": "Cari pelepasan yang saya terlepas →",
+    "cta_secondary": "Lihat demo"
+  },
+  "wizard": {
+    "question_of": "Soalan {current} daripada {total}",
+    "yes": "Ya",
+    "no": "Tidak"
+  },
+  "results": {
+    "you_saved": "Anda boleh jimat",
+    "less_tax": "Itu {pct}% kurang cukai yang anda bayar — secara sah.",
+    "without_reliefs": "Tanpa pelepasan",
+    "with_reliefs": "Dengan semua pelepasan",
+    "reliefs_applied": "Pelepasan Digunakan",
+    "action_plan": "Pelan Tindakan Sebelum Akhir Tahun"
+  }
+}

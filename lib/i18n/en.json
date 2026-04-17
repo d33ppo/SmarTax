@@ -1,0 +1,31 @@
+{
+  "app": {
+    "name": "TaxPilot",
+    "tagline": "Find every ringgit you're owed."
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "chat": "Ask TaxPilot",
+    "login": "Log in",
+    "signup": "Get started free"
+  },
+  "landing": {
+    "hero_title": "Stop leaving money on the table.",
+    "hero_subtitle": "The average Malaysian claims only 4 of 18 available tax reliefs. TaxPilot finds every ringgit you're owed — with LHDN citations.",
+    "cta_primary": "Find my missed reliefs →",
+    "cta_secondary": "See demo"
+  },
+  "wizard": {
+    "question_of": "Question {current} of {total}",
+    "yes": "Yes",
+    "no": "No"
+  },
+  "results": {
+    "you_saved": "You could have saved",
+    "less_tax": "That's {pct}% less tax than you paid — legally.",
+    "without_reliefs": "Without reliefs",
+    "with_reliefs": "With all reliefs",
+    "reliefs_applied": "Reliefs Applied",
+    "action_plan": "Pre-Year-End Action Plan"
+  }
+}
