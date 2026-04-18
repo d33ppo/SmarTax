@@ -8,7 +8,7 @@ export default function SMEDashboardPage() {
           <span className="text-sm text-gray-500">SME / Business Owner</span>
           <h1 className="text-2xl font-bold text-gray-900 mt-1">Hi, Razak 👋</h1>
           <p className="text-gray-600 mt-2">
-            Upload your P&amp;L and let TaxPilot identify capital allowances and deductible business expenses.
+            Upload your P&amp;L and let SmarTax identify capital allowances and deductible business expenses.
           </p>
         </div>
 
@@ -40,7 +40,7 @@ export default function SMEDashboardPage() {
             className="flex items-center justify-between bg-white border border-gray-200 rounded-xl p-5 hover:bg-gray-50 transition"
           >
             <div>
-              <p className="font-semibold text-gray-900">Ask TaxPilot</p>
+              <p className="font-semibold text-gray-900">Ask SmarTax</p>
               <p className="text-sm text-gray-500 mt-0.5">
                 &quot;Can I claim my home office setup?&quot; — get cited answers
               </p>

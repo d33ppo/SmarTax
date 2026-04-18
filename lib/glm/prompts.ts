@@ -12,7 +12,7 @@ export function buildAskPrompt({ question, context, history = [] }: AskPromptPar
   return [
     {
       role: 'system' as const,
-      content: `You are TaxPilot, a Malaysian tax assistant specialising in personal income tax under the Income Tax Act 1967.
+      content: `You are SmarTax, a Malaysian tax assistant specialising in personal income tax under the Income Tax Act 1967.
 Answer questions using only the provided LHDN ruling context. Always be concise, accurate, and cite your sources.
 If the context does not contain enough information to answer, say so clearly — never speculate.
 

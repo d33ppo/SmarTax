@@ -1,17 +1,17 @@
 {
   "app": {
-    "name": "TaxPilot",
+    "name": "SmarTax",
     "tagline": "Find every ringgit you're owed."
   },
   "nav": {
     "dashboard": "Dashboard",
-    "chat": "Ask TaxPilot",
+    "chat": "Ask SmarTax",
     "login": "Log in",
     "signup": "Get started free"
   },
   "landing": {
     "hero_title": "Stop leaving money on the table.",
-    "hero_subtitle": "The average Malaysian claims only 4 of 18 available tax reliefs. TaxPilot finds every ringgit you're owed — with LHDN citations.",
+    "hero_subtitle": "The average Malaysian claims only 4 of 18 available tax reliefs. SmarTax finds every ringgit you're owed — with LHDN citations.",
     "cta_primary": "Find my missed reliefs →",
     "cta_secondary": "See demo"
   },

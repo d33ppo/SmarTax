@@ -33,7 +33,7 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
         <h1 className="text-2xl font-bold text-gray-900 mb-2">Welcome back</h1>
-        <p className="text-gray-500 text-sm mb-8">Log in to your TaxPilot account</p>
+        <p className="text-gray-500 text-sm mb-8">Log in to your SmarTax account</p>
 
         <form onSubmit={handleLogin} className="space-y-4">
           <div>

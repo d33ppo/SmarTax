@@ -1,17 +1,17 @@
 {
   "app": {
-    "name": "TaxPilot",
+    "name": "SmarTax",
     "tagline": "Cari setiap ringgit yang anda layak terima."
   },
   "nav": {
     "dashboard": "Papan Pemuka",
-    "chat": "Tanya TaxPilot",
+    "chat": "Tanya SmarTax",
     "login": "Log masuk",
     "signup": "Mulakan percuma"
   },
   "landing": {
     "hero_title": "Berhenti tinggalkan wang atas meja.",
-    "hero_subtitle": "Rakyat Malaysia biasanya hanya menuntut 4 daripada 18 pelepasan cukai tersedia. TaxPilot cari setiap ringgit anda — dengan rujukan LHDN.",
+    "hero_subtitle": "Rakyat Malaysia biasanya hanya menuntut 4 daripada 18 pelepasan cukai tersedia. SmarTax cari setiap ringgit anda — dengan rujukan LHDN.",
     "cta_primary": "Cari pelepasan yang saya terlepas →",
     "cta_secondary": "Lihat demo"
   },

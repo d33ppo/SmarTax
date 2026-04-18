@@ -12,7 +12,7 @@ export default function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: 'assistant',
-      content: 'Hi! I\'m TaxPilot. Ask me anything about Malaysian personal tax — I\'ll always cite the relevant LHDN ruling.',
+      content: 'Hi! I\'m SmarTax. Ask me anything about Malaysian personal tax — I\'ll always cite the relevant LHDN ruling.',
     },
   ])
   const [input, setInput] = useState('')
@@ -49,7 +49,7 @@ export default function ChatPage() {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <div className="border-b bg-white px-6 py-4">
-        <h1 className="font-semibold text-gray-900">Ask TaxPilot</h1>
+        <h1 className="font-semibold text-gray-900">Ask SmarTax</h1>
         <p className="text-xs text-gray-400">Answers grounded in LHDN Public Rulings</p>
       </div>
 

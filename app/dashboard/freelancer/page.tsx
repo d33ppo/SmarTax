@@ -8,7 +8,7 @@ export default function FreelancerDashboardPage() {
           <span className="text-sm text-gray-500">Freelancer / Gig Worker</span>
           <h1 className="text-2xl font-bold text-gray-900 mt-1">Hi, Jia Wen 👋</h1>
           <p className="text-gray-600 mt-2">
-            No EA Form? No problem. Declare your income sources and TaxPilot will handle the rest.
+            No EA Form? No problem. Declare your income sources and SmarTax will handle the rest.
           </p>
         </div>
 
@@ -47,7 +47,7 @@ export default function FreelancerDashboardPage() {
             className="flex items-center justify-between bg-white border border-gray-200 rounded-xl p-5 hover:bg-gray-50 transition"
           >
             <div>
-              <p className="font-semibold text-gray-900">Ask TaxPilot</p>
+              <p className="font-semibold text-gray-900">Ask SmarTax</p>
               <p className="text-sm text-gray-500 mt-0.5">
                 &quot;Is my laptop tax-deductible?&quot; — cited LHDN answers
               </p>

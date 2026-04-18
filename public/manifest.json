@@ -1,6 +1,6 @@
 {
-  "name": "TaxPilot",
-  "short_name": "TaxPilot",
+  "name": "SmarTax",
+  "short_name": "SmarTax",
   "description": "Malaysia's AI-powered tax relief finder",
   "start_url": "/",
   "display": "standalone",

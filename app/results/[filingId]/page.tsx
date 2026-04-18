@@ -65,7 +65,7 @@ export default async function ResultsPage({ params }: Props) {
             href="/chat"
             className="flex-1 text-center border border-gray-300 text-gray-700 py-3 rounded-xl font-medium hover:bg-gray-50 transition"
           >
-            Ask TaxPilot
+            Ask SmarTax
           </a>
         </div>
       </div>

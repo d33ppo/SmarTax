@@ -5,7 +5,7 @@ export default function LandingPage() {
   return (
     <main className="min-h-screen bg-gradient-to-br from-blue-50 to-white">
       <nav className="flex items-center justify-between px-6 py-4 max-w-6xl mx-auto">
-        <Image src="/logo.svg" alt="TaxPilot" width={140} height={36} />
+        <Image src="/logo.svg" alt="SmarTax" width={140} height={36} />
         <div className="flex gap-4">
           <Link href="/login" className="text-sm text-gray-600 hover:text-gray-900">
             Log in
@@ -28,7 +28,7 @@ export default function LandingPage() {
         </h1>
         <p className="text-xl text-gray-600 mb-10 max-w-2xl mx-auto">
           The average Malaysian claims only 4 of 18 available tax reliefs.
-          TaxPilot finds every ringgit you&apos;re owed — with LHDN citations.
+          SmarTax finds every ringgit you&apos;re owed — with LHDN citations.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Link

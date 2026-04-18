@@ -1,18 +1,18 @@
-# TaxPilot — Malaysia's AI-Powered Tax Relief Finder
+# SmarTax — Malaysia's AI-Powered Tax Relief Finder
 
-> Stop leaving money on the table. TaxPilot finds every ringgit you're owed.
+> Stop leaving money on the table. SmarTax finds every ringgit you're owed.
 
 ## The Problem
 
 Malaysian taxpayers leave an estimated **RM 2.3 billion** in unclaimed reliefs every year — not because they're ineligible, but because the system is too complex to navigate. The average individual only claims 4 of 18 available reliefs.
 
-## What TaxPilot Does
+## What SmarTax Does
 
 Upload your EA Form → answer 8 questions → see exactly how much money you missed, with one-click LHDN citations.
 
 ### Three Personas, One Platform
 
-| Persona | Pain Point | TaxPilot Solution |
+| Persona | Pain Point | SmarTax Solution |
 |---------|-----------|-------------------|
 | **Aminah** (salaried) | Doesn't know which reliefs apply | Wizard surfaces all 18 reliefs with eligibility check |
 | **Razak** (SME owner) | Capital allowance confusion | P&L upload → AI extracts claimable expenses |

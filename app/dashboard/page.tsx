@@ -35,7 +35,7 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-gray-50 px-6 py-12">
       <div className="max-w-3xl mx-auto">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Who are you filing as?</h1>
-        <p className="text-gray-500 mb-10">Select your profile so TaxPilot can find the right reliefs for you.</p>
+        <p className="text-gray-500 mb-10">Select your profile so SmarTax can find the right reliefs for you.</p>
 
         <div className="space-y-4">
           {personas.map((p) => (
