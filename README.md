@@ -1,10 +1,10 @@
-# SmarTax — Malaysia's AI-Powered Tax Relief Finder
+# SmarTax Malaysia's AI-Powered Tax Relief Finder
 
 > Stop leaving money on the table. SmarTax finds every ringgit you're owed.
 
 ## The Problem
 
-Malaysian taxpayers leave an estimated **RM 2.3 billion** in unclaimed reliefs every year — not because they're ineligible, but because the system is too complex to navigate. The average individual only claims 4 of 18 available reliefs.
+Malaysian taxpayers leave an estimated **RM 2.3 billion** in unclaimed reliefs every year not because they're ineligible, but because the system is too complex to navigate. The average individual only claims 4 of 18 available reliefs.
 
 ## What SmarTax Does
 
@@ -22,7 +22,7 @@ Upload your EA Form → answer 8 questions → see exactly how much money you mi
 
 - **Frontend**: Next.js 15 (App Router) + Tailwind CSS + shadcn/ui
 - **Backend**: Next.js API Routes (serverless)
-- **AI**: Z.AI GLM-4 Flash (primary) + OpenAI (embeddings)
+- **AI**: Z.AI GLM-4 Flash (primary)
 - **Database**: Supabase (PostgreSQL + pgvector for RAG)
 - **Auth**: Supabase Auth
 - **PDF Processing**: pdf-parse
