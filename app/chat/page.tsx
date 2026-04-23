@@ -46,9 +46,23 @@ function ChatContent() {
       })
 
       if (!res.ok || !res.body) {
+        let errorMessage = 'Sorry, something went wrong. Please try again.'
+        try {
+          const payload = await res.json()
+          if (payload?.error === 'AI provider timeout') {
+            errorMessage = payload?.requestId
+              ? `SmarTax AI took too long to respond. Please retry. (ref: ${payload.requestId})`
+              : 'SmarTax AI took too long to respond. Please retry.'
+          } else if (payload?.requestId) {
+            errorMessage = `Request failed. Please retry. (ref: ${payload.requestId})`
+          }
+        } catch {
+          // keep default fallback message
+        }
+
         setMessages((prev) => {
           const updated = [...prev]
-          updated[updated.length - 1] = { role: 'assistant', content: 'Sorry, something went wrong. Please try again.' }
+          updated[updated.length - 1] = { role: 'assistant', content: errorMessage }
           return updated
         })
         return

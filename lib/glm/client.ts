@@ -11,11 +11,13 @@ class GLMClient {
   private apiKey: string
   private baseUrl: string
   private model: string
+  private streamTimeoutMs: number
 
   constructor() {
     this.apiKey = process.env.GLM_API_KEY!
     this.baseUrl = process.env.GLM_BASE_URL ?? 'https://api.ilmu.ai/v1'
-    this.model = 'ilmu-glm-5.1'
+    this.model = process.env.GLM_MODEL ?? 'ilmu-glm-5.1'
+    this.streamTimeoutMs = Number(process.env.GLM_STREAM_TIMEOUT_MS ?? 50000)
   }
 
   async chat(messages: ChatMessage[], temperature = 0.3): Promise<string> {
@@ -46,7 +48,7 @@ class GLMClient {
         Authorization: `Bearer ${this.apiKey}`,
       },
       body: JSON.stringify({ model: this.model, messages, temperature, stream: true }),
-      signal: AbortSignal.timeout(30000),
+      signal: AbortSignal.timeout(this.streamTimeoutMs),
     })
 
     if (!res.ok) {

@@ -5,6 +5,8 @@ import { buildAskPrompt } from '@/lib/glm/prompts'
 import { retrieve } from '@/lib/rag/retriever'
 import { createClient } from '@/lib/supabase/server'
 
+type AskHistoryMessage = { role?: string; content?: string }
+
 function makeRequestId() {
   return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`
 }
@@ -25,6 +27,19 @@ async function withTimeout<T>(promise: Promise<T>, timeoutMs: number, fallback: 
 
 export const runtime = 'nodejs'
 export const maxDuration = 60
+
+function normalizeHistory(history: unknown): { role: 'user' | 'assistant'; content: string }[] {
+  if (!Array.isArray(history)) return []
+
+  return (history as AskHistoryMessage[])
+    .filter((m) => (m.role === 'user' || m.role === 'assistant') && typeof m.content === 'string')
+    .slice(-8)
+    .map((m) => ({
+      role: m.role as 'user' | 'assistant',
+      content: (m.content as string).slice(0, 600),
+    }))
+}
+
 export async function POST(req: NextRequest) {
   const requestId = makeRequestId()
   const startedAt = Date.now()
@@ -38,12 +53,14 @@ export async function POST(req: NextRequest) {
     const context = chunks.map((c: { content: string }) => c.content).join('\n\n')
     const citations = chunks.map((c: { citation: string }) => c.citation).filter(Boolean)
 
-    const prompt = buildAskPrompt({ question, context, history })
+    const promptHistory = normalizeHistory(history)
+    const prompt = buildAskPrompt({ question, context, history: promptHistory })
+    const promptChars = JSON.stringify(prompt).length
     const glmStartedAt = Date.now()
     const glmRes = await glmClient.chatStream(prompt)
     const glmConnectMs = Date.now() - glmStartedAt
 
-    console.info(`[ask][${requestId}] retrieveMs=${retrieveMs} glmConnectMs=${glmConnectMs} chunks=${chunks.length}`)
+    console.info(`[ask][${requestId}] retrieveMs=${retrieveMs} glmConnectMs=${glmConnectMs} chunks=${chunks.length} promptChars=${promptChars}`)
 
     const encoder = new TextEncoder()
     const stream = new ReadableStream({
@@ -111,8 +128,10 @@ export async function POST(req: NextRequest) {
     })
   } catch (err) {
     console.error(`[ask][${requestId}] ask error:`, err)
-    return new Response(JSON.stringify({ error: 'Failed to get answer', requestId }), {
-      status: 502,
+    const message = err instanceof Error ? err.message : String(err)
+    const isTimeout = /timeout|aborted/i.test(message)
+    return new Response(JSON.stringify({ error: isTimeout ? 'AI provider timeout' : 'Failed to get answer', requestId }), {
+      status: isTimeout ? 504 : 502,
       headers: { 'Content-Type': 'application/json' },
     })
   }
