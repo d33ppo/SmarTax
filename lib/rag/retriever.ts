@@ -1,5 +1,4 @@
 import { createClient } from '@supabase/supabase-js'
-import { embed } from './embedder'
 
 export interface Chunk {
   id: string
@@ -15,15 +14,20 @@ export async function retrieve(query: string, topK = 5): Promise<Chunk[]> {
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   )
 
-  const queryEmbedding = await embed(query)
+  // Use keyword search since we don't have an embedding model
+  const { data, error } = await supabase
+    .from('ruling_chunks')
+    .select('*')
+    .ilike('content', `%${query}%`)
+    .limit(topK)
 
-  const { data, error } = await supabase.rpc('match_ruling_chunks', {
-    query_embedding: queryEmbedding,
-    match_threshold: 0.7,
-    match_count: topK,
-  })
+  if (error) {
+    console.error('Keyword search error:', error)
+    return []
+  }
 
-  if (error) throw error
-
-  return data as Chunk[]
+  return (data as any[]).map(d => ({
+    ...d,
+    similarity: 1 // Placeholder for similarity
+  }))
 }

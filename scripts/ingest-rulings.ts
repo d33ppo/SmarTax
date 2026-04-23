@@ -3,7 +3,6 @@ import path from 'path'
 import { createClient } from '@supabase/supabase-js'
 import pdfParse from 'pdf-parse'
 import { chunkText } from '../lib/rag/chunker'
-import { embedBatch } from '../lib/rag/embedder'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -37,13 +36,12 @@ async function ingestRulings() {
     const batchSize = 20
     for (let i = 0; i < chunks.length; i += batchSize) {
       const batch = chunks.slice(i, i + batchSize)
-      const embeddings = await embedBatch(batch.map((c) => c.content))
 
-      const rows = batch.map((chunk, j) => ({
+      const rows = batch.map((chunk) => ({
         source: chunk.source,
         citation: chunk.citation,
         content: chunk.content,
-        embedding: embeddings[j],
+        // Embedding is skipped as only ilmu-glm-5.1 is available
       }))
 
       const { error } = await supabase.from('ruling_chunks').insert(rows)
