@@ -44,7 +44,7 @@ async function ingestRulings() {
         // Embedding is skipped as only ilmu-glm-5.1 is available
       }))
 
-      const { error } = await supabase.from('ruling_chunks').insert(rows)
+      const { error } = await supabase.from('rulings_vectors').insert(rows)
       if (error) console.error(`  Batch error:`, error.message)
       else console.log(`  Inserted batch ${Math.floor(i / batchSize) + 1}`)
     }

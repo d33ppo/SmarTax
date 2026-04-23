@@ -16,7 +16,7 @@ export async function retrieve(query: string, topK = 5): Promise<Chunk[]> {
 
   // Use keyword search since we don't have an embedding model
   const { data, error } = await supabase
-    .from('ruling_chunks')
+    .from('rulings_vectors')
     .select('*')
     .ilike('content', `%${query}%`)
     .limit(topK)
