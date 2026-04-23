@@ -6,16 +6,17 @@ import ActionPlan from '@/components/tax/ActionPlan'
 import { createClient } from '@/lib/supabase/server'
 
 interface Props {
-  params: { filingId: string }
+  params: Promise<{ filingId: string }>
 }
 
 export default async function ResultsPage({ params }: Props) {
   const supabase = createClient()
+  const resolvedParams = await params
 
   const { data: filing, error } = await supabase
     .from('filings')
     .select('*, reliefs(*)')
-    .eq('id', params.filingId)
+    .eq('id', resolvedParams.filingId)
     .single()
 
   if (error || !filing) notFound()
@@ -52,11 +53,11 @@ export default async function ResultsPage({ params }: Props) {
           </div>
         </div>
 
-        <ActionPlan filingId={params.filingId} />
+        <ActionPlan filingId={resolvedParams.filingId} />
 
         <div className="flex gap-4">
           <a
-            href={`/simulator/${params.filingId}`}
+            href={`/simulator/${resolvedParams.filingId}`}
             className="flex-1 text-center bg-blue-600 text-white py-3 rounded-xl font-medium hover:bg-blue-700 transition"
           >
             Try Scenario Simulator →
