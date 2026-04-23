@@ -14,8 +14,8 @@ class GLMClient {
 
   constructor() {
     this.apiKey = process.env.GLM_API_KEY!
-    this.baseUrl = process.env.GLM_BASE_URL ?? 'https://open.bigmodel.cn/api/paas/v4'
-    this.model = 'glm-4-flash'
+    this.baseUrl = process.env.GLM_BASE_URL ?? 'https://api.ilmu.ai/v1'
+    this.model = 'ilmu-glm-5.1'
   }
 
   async chat(messages: ChatMessage[], temperature = 0.3): Promise<string> {
