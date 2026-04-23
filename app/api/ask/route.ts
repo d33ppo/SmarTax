@@ -5,16 +5,45 @@ import { buildAskPrompt } from '@/lib/glm/prompts'
 import { retrieve } from '@/lib/rag/retriever'
 import { createClient } from '@/lib/supabase/server'
 
+function makeRequestId() {
+  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`
+}
+
+async function withTimeout<T>(promise: Promise<T>, timeoutMs: number, fallback: T): Promise<T> {
+  let timeoutHandle: ReturnType<typeof setTimeout> | undefined
+  try {
+    return await Promise.race([
+      promise,
+      new Promise<T>((resolve) => {
+        timeoutHandle = setTimeout(() => resolve(fallback), timeoutMs)
+      }),
+    ])
+  } finally {
+    if (timeoutHandle) clearTimeout(timeoutHandle)
+  }
+}
+
+export const runtime = 'nodejs'
+export const maxDuration = 60
 export async function POST(req: NextRequest) {
+  const requestId = makeRequestId()
+  const startedAt = Date.now()
   try {
     const { question, history, filingId } = await req.json()
 
-    const chunks = await retrieve(question, 5)
+    const retrieveStartedAt = Date.now()
+    const chunks = await withTimeout(retrieve(question, 5), 2500, [])
+    const retrieveMs = Date.now() - retrieveStartedAt
+
     const context = chunks.map((c: { content: string }) => c.content).join('\n\n')
     const citations = chunks.map((c: { citation: string }) => c.citation).filter(Boolean)
 
     const prompt = buildAskPrompt({ question, context, history })
+    const glmStartedAt = Date.now()
     const glmRes = await glmClient.chatStream(prompt)
+    const glmConnectMs = Date.now() - glmStartedAt
+
+    console.info(`[ask][${requestId}] retrieveMs=${retrieveMs} glmConnectMs=${glmConnectMs} chunks=${chunks.length}`)
 
     const encoder = new TextEncoder()
     const stream = new ReadableStream({
@@ -49,7 +78,7 @@ export async function POST(req: NextRequest) {
             }
           }
         } catch (err) {
-          console.error('stream error:', err)
+          console.error(`[ask][${requestId}] stream error:`, err)
           controller.enqueue(encoder.encode(`data: ${JSON.stringify({ error: 'Stream interrupted' })}\n\n`))
         } finally {
           controller.close()
@@ -64,8 +93,11 @@ export async function POST(req: NextRequest) {
               retrieved_rulings: chunks,
             })
           } catch (err) {
-            console.error('chat_history save error:', err)
+            console.error(`[ask][${requestId}] chat_history save error:`, err)
           }
+
+          const totalMs = Date.now() - startedAt
+          console.info(`[ask][${requestId}] completed totalMs=${totalMs}`)
         }
       },
     })
@@ -78,9 +110,9 @@ export async function POST(req: NextRequest) {
       },
     })
   } catch (err) {
-    console.error('ask error:', err)
-    return new Response(JSON.stringify({ error: 'Failed to get answer' }), {
-      status: 500,
+    console.error(`[ask][${requestId}] ask error:`, err)
+    return new Response(JSON.stringify({ error: 'Failed to get answer', requestId }), {
+      status: 502,
       headers: { 'Content-Type': 'application/json' },
     })
   }

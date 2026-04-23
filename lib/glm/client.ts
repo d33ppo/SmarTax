@@ -46,6 +46,7 @@ class GLMClient {
         Authorization: `Bearer ${this.apiKey}`,
       },
       body: JSON.stringify({ model: this.model, messages, temperature, stream: true }),
+      signal: AbortSignal.timeout(30000),
     })
 
     if (!res.ok) {
