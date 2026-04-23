@@ -17,11 +17,12 @@ export async function POST(req: NextRequest) {
     const supabase = createClient()
     const { data: filing, error } = await (supabase.from('filings') as any)
       .insert({
+        mode: 'individual',
+        tax_year: eaData.yearOfAssessment,
         gross_income: eaData.grossIncome,
-        epf_employee: eaData.epfEmployee,
-        pcb: eaData.pcb,
-        year_of_assessment: eaData.yearOfAssessment,
-        raw_data: eaData,
+        pcb_paid: eaData.pcb,
+        raw_ea_data: eaData,
+        status: 'draft',
       })
       .select('id')
       .single()

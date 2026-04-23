@@ -13,7 +13,8 @@ export interface EAData {
 
 export async function parseEAForm(buffer: Buffer): Promise<EAData> {
   const parsed = await pdfParse(buffer)
-  const text = parsed.text
+  // Truncate to 4000 chars — EA forms are short; full text risks timeout on ilmu.ai
+  const text = parsed.text.slice(0, 4000)
 
   const messages = buildExtractEAPrompt({ text })
   const response = await glmClient.chat(messages)

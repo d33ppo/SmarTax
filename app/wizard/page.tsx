@@ -38,13 +38,20 @@ function WizardContent() {
 
   async function submitAnswers(finalAnswers: Record<string, string | boolean | number>) {
     setLoading(true)
-    const res = await fetch('/api/find-reliefs', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ filingId, answers: finalAnswers }),
-    })
-    const data = await res.json()
-    router.push(`/results/${data.filingId}`)
+    try {
+      const res = await fetch('/api/find-reliefs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ filingId, answers: finalAnswers }),
+      })
+      const data = await res.json()
+      if (!res.ok || !data.filingId) throw new Error(data.error ?? 'Failed to calculate reliefs')
+      router.push(`/results/${data.filingId}`)
+    } catch (err) {
+      console.error('wizard submit error:', err)
+      setLoading(false)
+      alert(err instanceof Error ? err.message : 'Something went wrong. Please try again.')
+    }
   }
 
   if (loading) {

@@ -18,29 +18,29 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Filing not found' }, { status: 404 })
     }
 
-    const eligibleReliefs = getEligibleReliefs(answers, filing)
+    // EPF is stored in raw_ea_data, not as a direct column
+    const epfEmployee: number = (filing.raw_ea_data as any)?.epfEmployee ?? 0
+
+    const eligibleReliefs = getEligibleReliefs(answers, { gross_income: filing.gross_income, epf_employee: epfEmployee })
     const totalReliefs = eligibleReliefs.reduce((sum: number, r: { amount: number }) => sum + r.amount, 0)
 
-    const taxWithout = calculateTax(filing.gross_income - filing.epf_employee)
-    const taxWith = calculateTax(filing.gross_income - filing.epf_employee - totalReliefs)
+    const taxWithout = calculateTax(filing.gross_income - epfEmployee)
+    const taxWith = calculateTax(filing.gross_income - epfEmployee - totalReliefs)
+    const chargeableIncome = Math.max(0, filing.gross_income - epfEmployee - totalReliefs)
 
     const { error: updateError } = await (supabase.from('filings') as any)
       .update({
-        answers,
-        tax_without_reliefs: taxWithout,
-        tax_with_reliefs: taxWith,
+        user_profile: { answers, reliefs: eligibleReliefs },
+        total_reliefs: totalReliefs,
+        chargeable_income: chargeableIncome,
+        tax_before_rebate: taxWithout,
+        final_tax_owed: taxWith,
+        tax_saved_vs_default: taxWithout - taxWith,
+        status: 'completed',
       })
       .eq('id', filingId)
 
     if (updateError) throw updateError
-
-    for (const relief of eligibleReliefs) {
-      await (supabase.from('filing_reliefs') as any).insert({
-        filing_id: filingId,
-        relief_id: relief.id,
-        amount: relief.amount,
-      })
-    }
 
     return NextResponse.json({ filingId, savings: taxWithout - taxWith })
   } catch (err) {

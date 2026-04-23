@@ -26,6 +26,7 @@ class GLMClient {
         Authorization: `Bearer ${this.apiKey}`,
       },
       body: JSON.stringify({ model: this.model, messages, temperature }),
+      signal: AbortSignal.timeout(25000),
     })
 
     if (!res.ok) {
@@ -35,6 +36,24 @@ class GLMClient {
 
     const data: GLMResponse = await res.json()
     return data.choices[0].message.content
+  }
+
+  async chatStream(messages: ChatMessage[], temperature = 0.3): Promise<Response> {
+    const res = await fetch(`${this.baseUrl}/chat/completions`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${this.apiKey}`,
+      },
+      body: JSON.stringify({ model: this.model, messages, temperature, stream: true }),
+    })
+
+    if (!res.ok) {
+      const err = await res.text()
+      throw new Error(`GLM API error ${res.status}: ${err}`)
+    }
+
+    return res
   }
 }
 
