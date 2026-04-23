@@ -7,8 +7,7 @@ export async function POST(req: NextRequest) {
     const { filingId, epfContribution, lifeInsurance, educationFee } = await req.json()
 
     const supabase = createClient()
-    const { data: filing, error } = await supabase
-      .from('filings')
+    const { data: filing, error } = await (supabase.from('filings') as any)
       .select('gross_income, epf_employee, tax_with_reliefs')
       .eq('id', filingId)
       .single()

@@ -9,8 +9,7 @@ export async function POST(req: NextRequest) {
 
     const supabase = createClient()
 
-    const { data: filing, error: filingError } = await supabase
-      .from('filings')
+    const { data: filing, error: filingError } = await (supabase.from('filings') as any)
       .select('*')
       .eq('id', filingId)
       .single()
@@ -25,8 +24,7 @@ export async function POST(req: NextRequest) {
     const taxWithout = calculateTax(filing.gross_income - filing.epf_employee)
     const taxWith = calculateTax(filing.gross_income - filing.epf_employee - totalReliefs)
 
-    const { error: updateError } = await supabase
-      .from('filings')
+    const { error: updateError } = await (supabase.from('filings') as any)
       .update({
         answers,
         tax_without_reliefs: taxWithout,
@@ -37,7 +35,7 @@ export async function POST(req: NextRequest) {
     if (updateError) throw updateError
 
     for (const relief of eligibleReliefs) {
-      await supabase.from('filing_reliefs').insert({
+      await (supabase.from('filing_reliefs') as any).insert({
         filing_id: filingId,
         relief_id: relief.id,
         amount: relief.amount,

@@ -13,8 +13,7 @@ export default async function ResultsPage({ params }: Props) {
   const supabase = createClient()
   const resolvedParams = await params
 
-  const { data: filing, error } = await supabase
-    .from('filings')
+  const { data: filing, error } = await (supabase.from('filings') as any)
     .select('*, reliefs(*)')
     .eq('id', resolvedParams.filingId)
     .single()

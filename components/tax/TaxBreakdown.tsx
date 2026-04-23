@@ -20,7 +20,7 @@ export default function TaxBreakdown({ filing }: Props) {
       </div>
       <div className="divide-y divide-gray-50">
         {LINE_ITEMS.map((item) => {
-          const value = (filing as Record<string, number>)[item.key] ?? 0
+          const value = (filing as any)[item.key] ?? 0
           return (
             <div
               key={item.key}
