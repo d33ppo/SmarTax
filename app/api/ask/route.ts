@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+export const dynamic = 'force-dynamic'
 import { glmClient } from '@/lib/glm/client'
 import { buildAskPrompt } from '@/lib/glm/prompts'
 import { retrieve } from '@/lib/rag/retriever'

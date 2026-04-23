@@ -15,8 +15,7 @@ export async function POST(req: NextRequest) {
     const eaData = await parseEAForm(buffer)
 
     const supabase = createClient()
-    const { data: filing, error } = await supabase
-      .from('filings')
+    const { data: filing, error } = await (supabase.from('filings') as any)
       .insert({
         gross_income: eaData.grossIncome,
         epf_employee: eaData.epfEmployee,

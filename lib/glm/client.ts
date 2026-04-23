@@ -36,6 +36,25 @@ class GLMClient {
     const data: GLMResponse = await res.json()
     return data.choices[0].message.content
   }
+
+  async embed(input: string | string[]): Promise<number[][]> {
+    const res = await fetch(`${this.baseUrl}/embeddings`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${this.apiKey}`,
+      },
+      body: JSON.stringify({ model: 'embedding-3', input }),
+    })
+
+    if (!res.ok) {
+      const err = await res.text()
+      throw new Error(`GLM Embed API error ${res.status}: ${err}`)
+    }
+
+    const data = await res.json()
+    return data.data.map((d: any) => d.embedding)
+  }
 }
 
 export const glmClient = new GLMClient()

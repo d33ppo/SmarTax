@@ -1,11 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import { embed } from './embedder'
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
-
 export interface Chunk {
   id: string
   content: string
@@ -15,6 +10,11 @@ export interface Chunk {
 }
 
 export async function retrieve(query: string, topK = 5): Promise<Chunk[]> {
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+
   const queryEmbedding = await embed(query)
 
   const { data, error } = await supabase.rpc('match_ruling_chunks', {

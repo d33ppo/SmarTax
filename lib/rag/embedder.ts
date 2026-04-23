@@ -1,19 +1,10 @@
-import OpenAI from 'openai'
-
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+import { glmClient } from '../glm/client'
 
 export async function embed(text: string): Promise<number[]> {
-  const res = await openai.embeddings.create({
-    model: 'text-embedding-3-small',
-    input: text,
-  })
-  return res.data[0].embedding
+  const embeddings = await glmClient.embed(text)
+  return embeddings[0]
 }
 
 export async function embedBatch(texts: string[]): Promise<number[][]> {
-  const res = await openai.embeddings.create({
-    model: 'text-embedding-3-small',
-    input: texts,
-  })
-  return res.data.map((d) => d.embedding)
+  return await glmClient.embed(texts)
 }
