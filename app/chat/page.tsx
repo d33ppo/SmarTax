@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
 
 interface Message {
   role: 'user' | 'assistant'
@@ -8,7 +9,10 @@ interface Message {
   citations?: string[]
 }
 
-export default function ChatPage() {
+function ChatContent() {
+  const searchParams = useSearchParams()
+  const filingId = searchParams.get('filingId')
+
   const [messages, setMessages] = useState<Message[]>([
     {
       role: 'assistant',
@@ -32,14 +36,13 @@ export default function ChatPage() {
     setMessages((prev) => [...prev, { role: 'user', content: userMessage }])
     setLoading(true)
 
-    // Add placeholder for streaming assistant message
     setMessages((prev) => [...prev, { role: 'assistant', content: '' }])
 
     try {
       const res = await fetch('/api/ask', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question: userMessage, history: messages }),
+        body: JSON.stringify({ question: userMessage, history: messages, filingId }),
       })
 
       if (!res.ok || !res.body) {
@@ -179,5 +182,13 @@ export default function ChatPage() {
         </form>
       </div>
     </div>
+  )
+}
+
+export default function ChatPage() {
+  return (
+    <Suspense>
+      <ChatContent />
+    </Suspense>
   )
 }
