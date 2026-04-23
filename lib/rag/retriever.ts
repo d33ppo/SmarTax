@@ -14,23 +14,22 @@ export async function retrieve(query: string, topK = 5): Promise<Chunk[]> {
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   )
 
-  // Search the reliefs_master table for tax context
+  // Use keyword search since we don't have an embedding model
   const { data, error } = await supabase
-    .from('reliefs_master')
-    .select('id, name_en, description_en, category, max_amount, lhdn_ref')
-    .or(`name_en.ilike.%${query}%,description_en.ilike.%${query}%`)
+    .from('rulings_vectors')
+    .select('*')
+    .ilike('content', `%${query}%`)
     .limit(topK)
 
   if (error) {
-    console.error('Relief search error:', error)
+    console.error('Keyword search error:', error)
     return []
   }
 
   return (data as any[]).map(d => ({
     id: d.id,
-    content: `Relief: ${d.name_en}\nCategory: ${d.category}\nDescription: ${d.description_en}\nMax Amount: RM ${d.max_amount}\nReference: ${d.lhdn_ref}`,
-    citation: d.name_en,
-    source: d.lhdn_ref,
+    content: d.content,
+    citation: d.ruling_title || d.ruling_code, // Use title or code
+    source: d.source_url,
     similarity: 1
-  }))
-}
+/ Placeholder for similarity
