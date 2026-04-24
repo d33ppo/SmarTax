@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { calculateTax } from '@/lib/tax/engine'
 
 export async function POST(req: NextRequest) {
   try {
     const { filingId, epfContribution, lifeInsurance, educationFee } = await req.json()
 
-    const supabase = createClient()
+    const supabase = createAdminClient()
     const { data: filing, error } = await (supabase.from('filings') as any)
       .select('gross_income, epf_employee, tax_with_reliefs')
       .eq('id', filingId)

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { parseEAForm } from '@/lib/pdf/parser'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 
 export async function POST(req: NextRequest) {
   try {
@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
     const buffer = Buffer.from(await file.arrayBuffer())
     const eaData = await parseEAForm(buffer)
 
-    const supabase = createClient()
+    const supabase = createAdminClient()
     const { data: filing, error } = await (supabase.from('filings') as any)
       .insert({
         mode: 'individual',

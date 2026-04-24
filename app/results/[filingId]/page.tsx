@@ -3,14 +3,14 @@ import MissedMoneyCard from '@/components/tax/MissedMoneyCard'
 import TaxBreakdown from '@/components/tax/TaxBreakdown'
 import ReliefCard from '@/components/tax/ReliefCard'
 import ActionPlan from '@/components/tax/ActionPlan'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 
 interface Props {
   params: Promise<{ filingId: string }>
 }
 
 export default async function ResultsPage({ params }: Props) {
-  const supabase = createClient()
+  const supabase = createAdminClient()
   const resolvedParams = await params
 
   const { data: filing, error } = await (supabase.from('filings') as any)

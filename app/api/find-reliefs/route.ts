@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { calculateTax } from '@/lib/tax/engine'
 import { getEligibleReliefs } from '@/lib/tax/reliefs'
 
@@ -7,7 +7,7 @@ export async function POST(req: NextRequest) {
   try {
     const { filingId, answers } = await req.json()
 
-    const supabase = createClient()
+    const supabase = createAdminClient()
 
     const { data: filing, error: filingError } = await (supabase.from('filings') as any)
       .select('*')
