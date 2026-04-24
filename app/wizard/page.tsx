@@ -11,8 +11,22 @@ const QUESTIONS = [
   { id: 'child_count', label: 'How many children do you have?', type: 'number' },
   { id: 'has_disability', label: 'Do you or a dependent have a disability?', type: 'boolean' },
   { id: 'has_education', label: 'Did you pursue further education this year?', type: 'boolean' },
-  { id: 'has_life_insurance', label: 'Do you pay life insurance premiums?', type: 'boolean' },
-  { id: 'has_medical', label: 'Did you have medical expenses for parents?', type: 'boolean' },
+  {
+    id: 'has_life_insurance',
+    label: 'Do you pay life insurance premiums?',
+    type: 'boolean',
+    amountField: true,
+    amountKey: 'life_insurance_amount',
+    amountLabel: 'How much did you pay in life insurance premiums?',
+  },
+  {
+    id: 'has_medical',
+    label: 'Did you have medical expenses for parents?',
+    type: 'boolean',
+    amountField: true,
+    amountKey: 'parent_medical_amount',
+    amountLabel: 'Enter the total medical expenses for your parents',
+  },
 ]
 
 function WizardContent() {
@@ -22,11 +36,12 @@ function WizardContent() {
   const [step, setStep] = useState(0)
   const [answers, setAnswers] = useState<Record<string, string | boolean | number>>({})
   const [loading, setLoading] = useState(false)
+  const [amountInput, setAmountInput] = useState('')
+  const [awaitingAmountFor, setAwaitingAmountFor] = useState<string | null>(null)
 
   const question = QUESTIONS[step]
 
-  function handleAnswer(value: boolean | string | number) {
-    const newAnswers = { ...answers, [question.id]: value }
+  function goNext(newAnswers: Record<string, string | boolean | number>) {
     setAnswers(newAnswers)
 
     if (step < QUESTIONS.length - 1) {
@@ -34,6 +49,35 @@ function WizardContent() {
     } else {
       submitAnswers(newAnswers)
     }
+  }
+
+  function handleAnswer(value: boolean | string | number) {
+    if (question.type === 'boolean' && value === true && question.amountField) {
+      setAnswers({ ...answers, [question.id]: true })
+      setAwaitingAmountFor(question.id)
+      setAmountInput('')
+      return
+    }
+
+    goNext({ ...answers, [question.id]: value })
+  }
+
+  function handleAmountSubmit() {
+    const amount = Number(amountInput)
+    if (Number.isNaN(amount) || amount < 0) {
+      return
+    }
+
+    const amountKey = question.amountKey ?? `${question.id}_amount`
+    const newAnswers = {
+      ...answers,
+      [question.id]: true,
+      [amountKey]: amount,
+    }
+
+    setAwaitingAmountFor(null)
+    setAmountInput('')
+    goNext(newAnswers)
   }
 
   async function submitAnswers(finalAnswers: Record<string, string | boolean | number>) {
@@ -75,7 +119,7 @@ function WizardContent() {
         </p>
         <h2 className="text-2xl font-bold text-gray-900 mb-8">{question.label}</h2>
 
-        {question.type === 'boolean' && (
+        {question.type === 'boolean' && !awaitingAmountFor && (
           <div className="flex gap-4">
             <button
               onClick={() => handleAnswer(true)}
@@ -88,6 +132,26 @@ function WizardContent() {
               className="flex-1 py-4 rounded-xl border-2 border-gray-200 font-medium hover:border-gray-400 hover:bg-gray-50 transition"
             >
               No
+            </button>
+          </div>
+        )}
+
+        {question.type === 'boolean' && awaitingAmountFor === question.id && (
+          <div className="space-y-4">
+            <p className="text-sm text-gray-600">{question.amountLabel ?? 'Enter the amount'}</p>
+            <input
+              type="number"
+              min="0"
+              value={amountInput}
+              onChange={(event) => setAmountInput(event.target.value)}
+              className="w-full rounded-xl border-2 border-gray-200 px-4 py-3 focus:border-blue-500 focus:outline-none"
+              placeholder="0"
+            />
+            <button
+              onClick={handleAmountSubmit}
+              className="w-full py-4 rounded-xl bg-blue-600 text-white font-medium hover:bg-blue-700 transition"
+            >
+              Continue
             </button>
           </div>
         )}
