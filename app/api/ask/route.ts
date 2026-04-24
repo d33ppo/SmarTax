@@ -12,7 +12,13 @@ export async function POST(req: NextRequest) {
     const context = chunks.map((c: { content: string }) => c.content).join('\n\n')
     const citations = chunks.map((c: { citation: string }) => c.citation).filter(Boolean)
 
+    console.log("Chunks:", JSON.stringify(chunks, null, 2))
+    console.log("Context:", context)
+    console.log("Citations:", citations)
+
     const prompt = buildAskPrompt({ question, context, history })
+
+    console.log("Prompt:", JSON.stringify(prompt, null, 2))
 
     const answer = await glmClient.chat(prompt)
 
