@@ -117,6 +117,70 @@ function toKeyValueMap(value: unknown): Record<string, EAFieldValue> | undefined
   )
 }
 
+function extractLineAmount(line: string): number | undefined {
+  const matches = line.match(/\d[\d,]*(?:\.\d{1,2})?/g)
+  if (!matches || matches.length === 0) return undefined
+
+  const values = matches
+    .map((match) => toNumber(match, Number.NaN))
+    .filter((value) => Number.isFinite(value) && value >= 0)
+
+  if (values.length === 0) return undefined
+  return Math.max(...values)
+}
+
+function extractAmountByKeywords(text: string, keywords: string[]): number | undefined {
+  const lines = text
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+
+  for (let i = 0; i < lines.length; i += 1) {
+    const current = lines[i].toLowerCase()
+    const hit = keywords.some((keyword) => current.includes(keyword))
+    if (!hit) continue
+
+    const sameLineAmount = extractLineAmount(lines[i])
+    if (sameLineAmount !== undefined) return sameLineAmount
+
+    const nextLine = lines[i + 1]
+    if (nextLine) {
+      const nextLineAmount = extractLineAmount(nextLine)
+      if (nextLineAmount !== undefined) return nextLineAmount
+    }
+  }
+
+  return undefined
+}
+
+function extractYearOfAssessment(text: string, fileName?: string): number | undefined {
+  const lowerText = text.toLowerCase()
+  const yearLabelIndex = Math.max(lowerText.indexOf('year of assessment'), lowerText.indexOf('tahun taksiran'))
+
+  if (yearLabelIndex >= 0) {
+    const segment = text.slice(yearLabelIndex, yearLabelIndex + 120)
+    const segmentYearMatch = segment.match(/20\d{2}/)
+    if (segmentYearMatch) {
+      return toNumber(segmentYearMatch[0], Number.NaN)
+    }
+  }
+
+  const anyYearMatch = text.match(/20\d{2}/g)
+  if (anyYearMatch?.length) {
+    const candidates = anyYearMatch
+      .map((value) => toNumber(value, Number.NaN))
+      .filter((year) => Number.isFinite(year) && year >= 2010 && year <= 2099)
+    if (candidates.length) return candidates[0]
+  }
+
+  if (fileName) {
+    const fileYearMatch = fileName.match(/20\d{2}/)
+    if (fileYearMatch) return toNumber(fileYearMatch[0], Number.NaN)
+  }
+
+  return undefined
+}
+
 export async function parseEAForm(buffer: Buffer, options: ParseEAOptions = {}): Promise<EAData> {
   let extractionMethod: ExtractionMethod = 'pdf-text'
   let text = ''
@@ -144,20 +208,51 @@ export async function parseEAForm(buffer: Buffer, options: ParseEAOptions = {}):
   const messages = buildExtractEAPrompt({ text })
   const response = await glmClient.chat(messages)
 
+  let data: Partial<EAData> = {}
   const jsonMatch = response.match(/\{[\s\S]*\}/)
-  if (!jsonMatch) throw new Error('Failed to extract structured data from EA Form')
 
-  const data = JSON.parse(jsonMatch[0]) as EAData
+  if (jsonMatch) {
+    try {
+      data = JSON.parse(jsonMatch[0]) as Partial<EAData>
+    } catch {
+      data = {}
+    }
+  }
 
-  if (!data.grossIncome || !data.yearOfAssessment) {
+  const fallbackGrossIncome = extractAmountByKeywords(text, [
+    'gross income',
+    'gross remuneration',
+    'jumlah pendapatan kasar',
+    'saraan kasar',
+    'jumlah pendapatan penggajian',
+  ])
+  const fallbackEPF = extractAmountByKeywords(text, ['epf', 'kwsp', 'kumpulan wang simpanan pekerja'])
+  const fallbackPCB = extractAmountByKeywords(text, [
+    'pcb',
+    'potongan cukai berjadual',
+    'mtd',
+    'monthly tax deduction',
+  ])
+  const fallbackYear = extractYearOfAssessment(text, options.fileName)
+
+  const resolvedGrossIncome = toNumber(data.grossIncome, Number.NaN)
+  const resolvedYear = toNumber(data.yearOfAssessment, Number.NaN)
+  const finalGrossIncome = Number.isFinite(resolvedGrossIncome) && resolvedGrossIncome > 0
+    ? resolvedGrossIncome
+    : fallbackGrossIncome
+  const finalYear = Number.isFinite(resolvedYear) && resolvedYear >= 2010
+    ? resolvedYear
+    : fallbackYear
+
+  if (!finalGrossIncome || !finalYear) {
     throw new Error('Could not read required fields from EA Form. Please ensure the upload is complete and legible.')
   }
 
   return {
-    grossIncome: toNumber(data.grossIncome),
-    epfEmployee: toNumber(data.epfEmployee ?? 0),
-    pcb: toNumber(data.pcb ?? 0),
-    yearOfAssessment: toNumber(data.yearOfAssessment),
+    grossIncome: finalGrossIncome,
+    epfEmployee: toNumber(data.epfEmployee ?? fallbackEPF ?? 0),
+    pcb: toNumber(data.pcb ?? fallbackPCB ?? 0),
+    yearOfAssessment: finalYear,
     socsoEmployee: toOptionalNumber(data.socsoEmployee),
     eisEmployee: toOptionalNumber(data.eisEmployee),
     grossCommission: toOptionalNumber(data.grossCommission),
