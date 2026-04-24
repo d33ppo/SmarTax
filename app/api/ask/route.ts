@@ -53,6 +53,7 @@ export async function POST(req: NextRequest) {
     const context = chunks.map((c: { content: string }) => c.content).join('\n\n')
     const citations = chunks.map((c: { citation: string }) => c.citation).filter(Boolean)
 
+<<<<<<< HEAD
     const promptHistory = normalizeHistory(history)
     const prompt = buildAskPrompt({ question, context, history: promptHistory })
     const promptChars = JSON.stringify(prompt).length
@@ -61,6 +62,17 @@ export async function POST(req: NextRequest) {
     const glmConnectMs = Date.now() - glmStartedAt
 
     console.info(`[ask][${requestId}] retrieveMs=${retrieveMs} glmConnectMs=${glmConnectMs} chunks=${chunks.length} promptChars=${promptChars}`)
+=======
+    console.log("Chunks:", JSON.stringify(chunks, null, 2))
+    console.log("Context:", context)
+    console.log("Citations:", citations)
+
+    const prompt = buildAskPrompt({ question, context, history })
+
+    console.log("Prompt:", JSON.stringify(prompt, null, 2))
+
+    const answer = await glmClient.chat(prompt)
+>>>>>>> 22fa6b4ef87a8497d5e9892a0bd9de0623dbbceb
 
     const encoder = new TextEncoder()
     const stream = new ReadableStream({

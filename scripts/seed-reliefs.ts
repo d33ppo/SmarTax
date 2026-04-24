@@ -1,3 +1,6 @@
+import dotenv from 'dotenv'
+dotenv.config({ path: '.env.local' })
+
 import { createClient } from '@supabase/supabase-js'
 import { RELIEFS_MASTER } from '../lib/tax/reliefs'
 
@@ -10,16 +13,31 @@ async function seedReliefs() {
   console.log(`Seeding ${RELIEFS_MASTER.length} reliefs...`)
 
   const rows = RELIEFS_MASTER.map((r) => ({
-    id: r.id,
     code: r.code,
-    name: r.name,
-    name_ms: r.name,
-    description: r.description,
-    max_amount: r.maxAmount,
+
+    name_en: r.name_en,
+    name_ms: r.name_ms,
+
     category: r.category,
-    ruling_citation: r.ruling_citation,
-    ruling_url: r.ruling_url,
-    active: true,
+    max_amount: r.maxAmount,
+    per_unit: r.perUnit ?? false,
+
+    applies_to: r.appliesTo,
+
+    ita_section: r.citation.itaSection,
+    public_ruling: r.citation.publicRuling ?? null,
+    citation_url: r.citation.url ?? null,
+
+    requires: r.eligibilityRules.requires ?? [],
+    description_en: r.eligibilityRules.description_en,
+    description_ms: r.eligibilityRules.description_ms,
+
+    lhdn_ref: r.lhdnRef,
+
+    valid_from: r.validFrom,
+    valid_until: r.validUntil ?? null,
+
+    sub_limits: r.subLimits ?? null,
   }))
 
   const { error } = await supabase
