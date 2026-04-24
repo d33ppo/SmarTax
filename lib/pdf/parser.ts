@@ -1,4 +1,6 @@
 import pdfParse from 'pdf-parse'
+import { glmClient } from '@/lib/glm/client'
+import { buildExtractEAPrompt } from '@/lib/glm/prompts'
 
 export interface EAData {
   grossIncome: number
@@ -104,7 +106,98 @@ function findAmountByLineContext(lines: string[], labelPattern: RegExp, lookahea
   return best
 }
 
-function parseEAFromText(text: string, options?: ParseOptions): StrictExtractResult {
+function findGrossFromEASectionCode(lines: string[]): number | undefined {
+  const sectionCodePattern = /s\.?\s*13\s*\(\s*1\s*\)\s*\(\s*a\s*\)/i
+  return findAmountByLineContext(lines, sectionCodePattern, 8)
+}
+
+function extractAllAmounts(text: string): number[] {
+  const amountPattern = /\b\d{1,3}(?:[,\s]\d{3})*(?:\.\d{2})\b/g
+  const values = Array.from(text.matchAll(amountPattern))
+    .map((m) => Number.parseFloat(m[0].replace(/[\s,]/g, '')))
+    .filter((v) => Number.isFinite(v) && v >= 0)
+
+  // De-duplicate by rounding to cents
+  const seen = new Set<number>()
+  for (const value of values) {
+    seen.add(Math.round(value * 100))
+  }
+
+  return Array.from(seen).map((cents) => cents / 100)
+}
+
+function includesAmount(values: number[], target: number): boolean {
+  const cents = Math.round(target * 100)
+  return values.some((value) => Math.abs(Math.round(value * 100) - cents) <= 1)
+}
+
+function parseJSONObject(text: string): Record<string, unknown> | null {
+  const match = text.match(/\{[\s\S]*\}/)
+  if (!match) return null
+
+  try {
+    return JSON.parse(match[0]) as Record<string, unknown>
+  } catch {
+    return null
+  }
+}
+
+function asNumber(value: unknown): number | undefined {
+  if (typeof value === 'number' && Number.isFinite(value)) return value
+  if (typeof value === 'string' && value.trim()) {
+    const parsed = Number.parseFloat(value.replace(/,/g, ''))
+    if (Number.isFinite(parsed)) return parsed
+  }
+  return undefined
+}
+
+async function parseEAWithGLMFallback(text: string, options?: ParseOptions): Promise<StrictExtractResult | null> {
+  try {
+    const truncatedText = text.slice(0, 7000)
+    const messages = buildExtractEAPrompt({ text: truncatedText })
+    const response = await glmClient.chat(messages, 0.1)
+    const parsed = parseJSONObject(response)
+    if (!parsed) return null
+
+    const amountsInPdf = extractAllAmounts(text)
+    const grossIncome = asNumber(parsed.grossIncome)
+    if (!grossIncome || grossIncome < 1000 || !includesAmount(amountsInPdf, grossIncome)) {
+      return null
+    }
+
+    const modelYear = asNumber(parsed.yearOfAssessment)
+    const yearCandidate = options?.manualTaxYear ?? modelYear
+    if (!yearCandidate) return null
+
+    const year = Math.trunc(yearCandidate)
+    const maxYear = new Date().getFullYear() + 1
+    if (year < 2018 || year > maxYear) return null
+
+    const epfRaw = asNumber(parsed.epfEmployee)
+    const pcbRaw = asNumber(parsed.pcb)
+    const socsoRaw = asNumber(parsed.socsoEmployee)
+    const eisRaw = asNumber(parsed.eisEmployee)
+
+    const epf = epfRaw && includesAmount(amountsInPdf, epfRaw) ? epfRaw : 0
+    const pcb = pcbRaw && includesAmount(amountsInPdf, pcbRaw) ? pcbRaw : 0
+    const socso = socsoRaw && includesAmount(amountsInPdf, socsoRaw) ? socsoRaw : undefined
+    const eis = eisRaw && includesAmount(amountsInPdf, eisRaw) ? eisRaw : undefined
+
+    return {
+      parser: 'strict-ea',
+      yearOfAssessment: year,
+      grossIncome,
+      epfEmployee: epf,
+      pcb,
+      socsoEmployee: socso,
+      eisEmployee: eis,
+    }
+  } catch {
+    return null
+  }
+}
+
+async function parseEAFromText(text: string, options?: ParseOptions): Promise<StrictExtractResult> {
   const lower = text.toLowerCase()
   const lines = normalizeLines(text)
   const looksLikeEA =
@@ -125,6 +218,7 @@ function parseEAFromText(text: string, options?: ParseOptions): StrictExtractRes
   const eisPattern = /(?:\beis\b|\bsip\b)/i
 
   const grossIncome =
+    findGrossFromEASectionCode(lines) ??
     findAmountByLineContext(lines, grossPattern, 6) ??
     findAmountNearLabel(text, /(?:gaji\s+kasar|gross\s+salary|pendapatan\s+penggajian|jumlah\s+pendapatan\s+penggajian)/gi, 500)
 
@@ -145,6 +239,8 @@ function parseEAFromText(text: string, options?: ParseOptions): StrictExtractRes
     findAmountNearLabel(text, /(?:\beis\b|\bsip\b)/gi, 300)
 
   if (!grossIncome || grossIncome < 1000) {
+    const glmFallback = await parseEAWithGLMFallback(text, options)
+    if (glmFallback) return glmFallback
     throw new Error('Could not confidently extract EA gross income. Please upload a clearer text-based EA PDF.')
   }
 
@@ -204,7 +300,7 @@ export async function parseUploadedForm(buffer: Buffer, mode: FilingMode, option
 
   const result =
     mode === 'individual'
-      ? parseEAFromText(text, options)
+      ? await parseEAFromText(text, options)
       : parseBusinessDocument(text, mode)
 
   return {
