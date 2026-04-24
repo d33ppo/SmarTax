@@ -33,7 +33,9 @@ function UploadContent() {
   const searchParams = useSearchParams()
   const mode = normalizeMode(searchParams.get('mode'))
   const copy = MODE_COPY[mode]
+  const defaultTaxYear = String(new Date().getFullYear() - 1)
   const [file, setFile] = useState<File | null>(null)
+  const [taxYear, setTaxYear] = useState(defaultTaxYear)
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState('')
 
@@ -45,6 +47,9 @@ function UploadContent() {
     const formData = new FormData()
     formData.append('file', file)
     formData.append('mode', mode)
+    if (mode === 'individual' && taxYear.trim()) {
+      formData.append('taxYear', taxYear.trim())
+    }
 
     try {
       const res = await fetch('/api/extract-ea', { method: 'POST', body: formData })
@@ -94,6 +99,23 @@ function UploadContent() {
             </div>
           )}
         </div>
+
+        {mode === 'individual' && (
+          <div className="mt-4">
+            <label htmlFor="tax-year" className="block text-sm font-medium text-gray-700 mb-1">
+              Tax Year (if EA year text is unclear)
+            </label>
+            <input
+              id="tax-year"
+              type="number"
+              min={2018}
+              max={new Date().getFullYear() + 1}
+              value={taxYear}
+              onChange={(e) => setTaxYear(e.target.value)}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+        )}
 
         {error && <p className="text-red-600 text-sm mt-3">{error}</p>}
 

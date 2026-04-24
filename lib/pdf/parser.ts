@@ -11,6 +11,10 @@ export interface EAData {
 
 export type FilingMode = 'individual' | 'sme' | 'freelancer'
 
+interface ParseOptions {
+  manualTaxYear?: number
+}
+
 interface StrictExtractResult extends EAData {
   parser: 'strict-ea' | 'strict-business'
 }
@@ -21,6 +25,13 @@ function num(str: string): number {
 
 function normalizeText(text: string): string {
   return text.replace(/\r/g, '\n').replace(/\u00a0/g, ' ').replace(/[ \t]+/g, ' ')
+}
+
+function normalizeLines(text: string): string[] {
+  return text
+    .split('\n')
+    .map((line) => line.trim())
+    .filter(Boolean)
 }
 
 function extractYear(text: string): number | undefined {
@@ -71,8 +82,31 @@ function findAmountNearLabel(text: string, labelPattern: RegExp, searchWindow = 
   return best
 }
 
-function parseEAFromText(text: string): StrictExtractResult {
+function findAmountByLineContext(lines: string[], labelPattern: RegExp, lookahead = 4): number | undefined {
+  const amountPattern = /\b\d{1,3}(?:,\d{3})*(?:\.\d{2})\b/g
+  let best: number | undefined
+
+  for (let i = 0; i < lines.length; i += 1) {
+    if (!labelPattern.test(lines[i])) continue
+
+    const end = Math.min(lines.length - 1, i + lookahead)
+    const segment = lines.slice(i, end + 1).join(' ')
+    const values = Array.from(segment.matchAll(amountPattern))
+      .map((m) => num(m[0]))
+      .filter((v) => Number.isFinite(v) && v >= 0)
+
+    if (values.length === 0) continue
+
+    const candidate = Math.max(...values)
+    if (best === undefined || candidate > best) best = candidate
+  }
+
+  return best
+}
+
+function parseEAFromText(text: string, options?: ParseOptions): StrictExtractResult {
   const lower = text.toLowerCase()
+  const lines = normalizeLines(text)
   const looksLikeEA =
     lower.includes('borang ea') ||
     lower.includes('penyata gaji pekerja') ||
@@ -82,24 +116,40 @@ function parseEAFromText(text: string): StrictExtractResult {
     throw new Error('Uploaded file does not look like a Borang EA document.')
   }
 
-  const year = extractYear(text)
-  const grossIncome = findAmountNearLabel(
-    text,
-    /(?:gaji\s+kasar|gross\s+salary|pendapatan\s+penggajian|jumlah\s+pendapatan\s+penggajian)/gi,
-  )
-  const pcb = findAmountNearLabel(
-    text,
-    /(?:potongan\s+cukai\s+bulanan|pcb|mtd|cukai\s+berjadual)/gi,
-  )
-  const epf = findAmountNearLabel(
-    text,
-    /(?:kwsp|epf|kumpulan\s+wang\s+simpanan)/gi,
-  )
-  const socso = findAmountNearLabel(text, /(?:perkeso|socso)/gi)
-  const eis = findAmountNearLabel(text, /(?:\beis\b|\bsip\b)/gi)
+  const year = options?.manualTaxYear ?? extractYear(text)
 
-  if (!year || !grossIncome || grossIncome < 1000) {
-    throw new Error('Could not confidently extract EA gross income and tax year. Please upload a clearer text-based EA PDF.')
+  const grossPattern = /(?:gaji\s+kasar|gross\s+salary|pendapatan\s+penggajian|jumlah\s+pendapatan\s+penggajian)/i
+  const pcbPattern = /(?:potongan\s+cukai\s+bulanan|pcb|mtd|cukai\s+berjadual)/i
+  const epfPattern = /(?:kwsp|epf|kumpulan\s+wang\s+simpanan)/i
+  const socsoPattern = /(?:perkeso|socso)/i
+  const eisPattern = /(?:\beis\b|\bsip\b)/i
+
+  const grossIncome =
+    findAmountByLineContext(lines, grossPattern, 6) ??
+    findAmountNearLabel(text, /(?:gaji\s+kasar|gross\s+salary|pendapatan\s+penggajian|jumlah\s+pendapatan\s+penggajian)/gi, 500)
+
+  const pcb =
+    findAmountByLineContext(lines, pcbPattern, 5) ??
+    findAmountNearLabel(text, /(?:potongan\s+cukai\s+bulanan|pcb|mtd|cukai\s+berjadual)/gi, 420)
+
+  const epf =
+    findAmountByLineContext(lines, epfPattern, 5) ??
+    findAmountNearLabel(text, /(?:kwsp|epf|kumpulan\s+wang\s+simpanan)/gi, 420)
+
+  const socso =
+    findAmountByLineContext(lines, socsoPattern, 4) ??
+    findAmountNearLabel(text, /(?:perkeso|socso)/gi, 300)
+
+  const eis =
+    findAmountByLineContext(lines, eisPattern, 4) ??
+    findAmountNearLabel(text, /(?:\beis\b|\bsip\b)/gi, 300)
+
+  if (!grossIncome || grossIncome < 1000) {
+    throw new Error('Could not confidently extract EA gross income. Please upload a clearer text-based EA PDF.')
+  }
+
+  if (!year) {
+    throw new Error('Could not confidently extract EA tax year. Please provide tax year manually.')
   }
 
   return {
@@ -144,7 +194,7 @@ function parseBusinessDocument(text: string, mode: Extract<FilingMode, 'sme' | '
   }
 }
 
-export async function parseUploadedForm(buffer: Buffer, mode: FilingMode): Promise<EAData> {
+export async function parseUploadedForm(buffer: Buffer, mode: FilingMode, options?: ParseOptions): Promise<EAData> {
   const parsed = await pdfParse(buffer)
   const text = normalizeText(parsed.text)
 
@@ -154,7 +204,7 @@ export async function parseUploadedForm(buffer: Buffer, mode: FilingMode): Promi
 
   const result =
     mode === 'individual'
-      ? parseEAFromText(text)
+      ? parseEAFromText(text, options)
       : parseBusinessDocument(text, mode)
 
   return {

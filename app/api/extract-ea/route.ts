@@ -8,18 +8,27 @@ function normalizeMode(input: FormDataEntryValue | null): FilingMode {
   return 'individual'
 }
 
+function normalizeTaxYear(input: FormDataEntryValue | null): number | undefined {
+  if (typeof input !== 'string') return undefined
+  const value = Number.parseInt(input.trim(), 10)
+  const maxYear = new Date().getFullYear() + 1
+  if (!Number.isFinite(value) || value < 2018 || value > maxYear) return undefined
+  return value
+}
+
 export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData()
     const file = formData.get('file') as File | null
     const mode = normalizeMode(formData.get('mode'))
+    const manualTaxYear = normalizeTaxYear(formData.get('taxYear'))
 
     if (!file) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 })
     }
 
     const buffer = Buffer.from(await file.arrayBuffer())
-    const extractedData = await parseUploadedForm(buffer, mode)
+    const extractedData = await parseUploadedForm(buffer, mode, { manualTaxYear })
 
     const supabase = createAdminClient()
     const { data: filing, error } = await (supabase.from('filings') as any)
