@@ -12,10 +12,14 @@ export async function POST(req: NextRequest) {
     }
 
     const buffer = Buffer.from(await file.arrayBuffer())
-    const eaData = await parseEAForm(buffer)
+    const eaData = await parseEAForm(buffer, {
+      mimeType: file.type,
+      fileName: file.name,
+    })
 
     const supabase = createClient()
-    const { data: filing, error } = await (supabase.from('filings') as any)
+    const { data: filing, error } = await supabase
+      .from('filings')
       .insert({
         gross_income: eaData.grossIncome,
         epf_employee: eaData.epfEmployee,
@@ -28,7 +32,11 @@ export async function POST(req: NextRequest) {
 
     if (error) throw error
 
-    return NextResponse.json({ filingId: filing.id, data: eaData })
+    return NextResponse.json({
+      filingId: filing.id,
+      employeeName: eaData.employeeName ?? null,
+      data: eaData,
+    })
   } catch (err) {
     console.error('extract-ea error:', err)
     return NextResponse.json({ error: 'Failed to process EA Form' }, { status: 500 })

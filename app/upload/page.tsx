@@ -49,7 +49,7 @@ export default function UploadPage() {
           <input
             id="file-input"
             type="file"
-            accept=".pdf"
+            accept=".pdf,.png,.jpg,.jpeg"
             className="hidden"
             onChange={(e) => setFile(e.target.files?.[0] ?? null)}
           />
@@ -60,7 +60,7 @@ export default function UploadPage() {
             </div>
           ) : (
             <div>
-              <p className="text-gray-500">Drag &amp; drop your EA Form PDF here</p>
+              <p className="text-gray-500">Drag &amp; drop your EA Form (PDF or image) here</p>
               <p className="text-gray-400 text-sm mt-1">or click to browse</p>
             </div>
           )}

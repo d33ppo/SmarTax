@@ -45,7 +45,7 @@ export default function EAFormUploader({ onSuccess }: Props) {
         <input
           id="ea-file-input"
           type="file"
-          accept=".pdf"
+          accept=".pdf,.png,.jpg,.jpeg"
           className="hidden"
           onChange={(e) => setFile(e.target.files?.[0] ?? null)}
         />
@@ -53,7 +53,7 @@ export default function EAFormUploader({ onSuccess }: Props) {
           <p className="text-green-600 font-medium text-sm">{file.name}</p>
         ) : (
           <>
-            <p className="text-gray-500 text-sm">Drop your EA Form PDF here</p>
+            <p className="text-gray-500 text-sm">Drop your EA Form (PDF or image) here</p>
             <p className="text-gray-400 text-xs mt-1">or click to browse</p>
           </>
         )}
