@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { Suspense, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 
 type UploadMode = 'individual' | 'sme' | 'freelancer'
@@ -28,7 +28,7 @@ const MODE_COPY: Record<UploadMode, { title: string; subtitle: string; emptyHint
   },
 }
 
-export default function UploadPage() {
+function UploadContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const mode = normalizeMode(searchParams.get('mode'))
@@ -106,5 +106,13 @@ export default function UploadPage() {
         </button>
       </div>
     </div>
+  )
+}
+
+export default function UploadPage() {
+  return (
+    <Suspense>
+      <UploadContent />
+    </Suspense>
   )
 }
