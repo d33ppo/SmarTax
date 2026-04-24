@@ -72,15 +72,8 @@ export async function POST(req: NextRequest) {
     const filingInsert: FilingInsertPayload = {
       user_id: null,
       gross_income: eaData.grossIncome,
-      epf_employee: eaData.epfEmployee,
-      pcb: eaData.pcb,
-      year_of_assessment: eaData.yearOfAssessment,
-      answers: null,
-      tax_without_reliefs: null,
-      tax_with_reliefs: null,
       chargeable_income: null,
       total_reliefs: null,
-      raw_data: rawData,
     }
 
     const supabase = createClient()
