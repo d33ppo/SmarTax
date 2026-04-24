@@ -63,7 +63,14 @@ async function runTesseractOnImage(buffer: Buffer): Promise<string> {
 
 async function runTesseractOnPdf(buffer: Buffer, maxPages = 3): Promise<string> {
   const pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs')
-  const canvasLib = await import('@napi-rs/canvas')
+  const { createRequire } = await import('node:module')
+  const require = createRequire(import.meta.url)
+  const canvasLib = require('@napi-rs/canvas') as {
+    createCanvas: (width: number, height: number) => {
+      getContext: (contextId: '2d') => unknown
+      toBuffer: (mimeType?: string) => Buffer
+    }
+  }
 
   const loadingTask = pdfjs.getDocument({ data: new Uint8Array(buffer) })
   const pdf = await loadingTask.promise
@@ -79,6 +86,7 @@ async function runTesseractOnPdf(buffer: Buffer, maxPages = 3): Promise<string> 
     await page.render({
       canvasContext: context as unknown as CanvasRenderingContext2D,
       viewport,
+      canvas: canvas as unknown as HTMLCanvasElement,
     }).promise
 
     const imageBuffer = canvas.toBuffer('image/png')
