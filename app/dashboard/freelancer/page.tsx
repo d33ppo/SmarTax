@@ -32,7 +32,7 @@ export default function FreelancerDashboardPage() {
           </Link>
 
           <Link
-            href="/upload"
+            href="/upload?mode=freelancer"
             className="flex items-center justify-between bg-white border border-gray-200 rounded-xl p-5 hover:bg-gray-50 transition"
           >
             <div>

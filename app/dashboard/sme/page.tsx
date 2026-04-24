@@ -14,7 +14,7 @@ export default function SMEDashboardPage() {
 
         <div className="space-y-4">
           <Link
-            href="/upload"
+            href="/upload?mode=sme"
             className="flex items-center justify-between bg-white border-2 border-green-200 rounded-xl p-5 hover:bg-green-50 transition"
           >
             <div>

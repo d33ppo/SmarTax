@@ -1,6 +1,4 @@
 import pdfParse from 'pdf-parse'
-import { glmClient } from '@/lib/glm/client'
-import { buildExtractEAPrompt } from '@/lib/glm/prompts'
 
 export interface EAData {
   grossIncome: number
@@ -11,81 +9,160 @@ export interface EAData {
   eisEmployee?: number
 }
 
+export type FilingMode = 'individual' | 'sme' | 'freelancer'
+
+interface StrictExtractResult extends EAData {
+  parser: 'strict-ea' | 'strict-business'
+}
+
 function num(str: string): number {
   return parseFloat(str.replace(/,/g, '').trim())
 }
 
-// Fast regex extraction — covers standard LHDN EA form layouts without any GLM call
-function extractFromText(text: string): Partial<EAData> {
-  const t = text.replace(/\r/g, ' ')
-  const result: Partial<EAData> = {}
-
-  const yearMatch =
-    t.match(/(?:tahun\s+taksiran|year\s+of\s+assessment)[^0-9]*(202\d)/i) ||
-    t.match(/\b(202\d)\b/)
-  if (yearMatch) result.yearOfAssessment = parseInt(yearMatch[1])
-
-  const grossMatch =
-    t.match(/(?:jumlah\s+pendapatan\s+kasar|total\s+gross\s+income|gross\s+income)[^0-9]*([\d,]+\.?\d*)/i) ||
-    t.match(/\bC1\b[^0-9]*([\d,]+\.?\d*)/i) ||
-    t.match(/(?:pendapatan\s+penggajian|employment\s+income)[^0-9]*([\d,]+\.?\d*)/i)
-  if (grossMatch) result.grossIncome = num(grossMatch[1])
-
-  const epfMatch =
-    t.match(/(?:KWSP\/EPF|KWSP|kumpulan\s+wang\s+simpanan)[^0-9]*([\d,]+\.?\d*)/i) ||
-    t.match(/\bEPF\b[^0-9]*([\d,]+\.?\d*)/i)
-  if (epfMatch) result.epfEmployee = num(epfMatch[1])
-
-  const pcbMatch =
-    t.match(/(?:potongan\s+cukai\s+bulanan|cukai\s+berjadual|PCB\/MTD|PCB|MTD)[^0-9]*([\d,]+\.?\d*)/i)
-  if (pcbMatch) result.pcb = num(pcbMatch[1])
-
-  const socsoMatch = t.match(/(?:PERKESO|SOCSO)[^0-9]*([\d,]+\.?\d*)/i)
-  if (socsoMatch) result.socsoEmployee = num(socsoMatch[1])
-
-  const eisMatch = t.match(/(?:\bEIS\b|\bSIP\b)[^0-9]*([\d,]+\.?\d*)/i)
-  if (eisMatch) result.eisEmployee = num(eisMatch[1])
-
-  return result
+function normalizeText(text: string): string {
+  return text.replace(/\r/g, '\n').replace(/\u00a0/g, ' ').replace(/[ \t]+/g, ' ')
 }
 
-export async function parseEAForm(buffer: Buffer): Promise<EAData> {
-  const parsed = await pdfParse(buffer)
-  const text = parsed.text
-
-  // Try regex first — instant, no API call, works for 90%+ of standard EA forms
-  const extracted = extractFromText(text)
-  if (extracted.grossIncome && extracted.yearOfAssessment) {
-    return {
-      grossIncome: extracted.grossIncome,
-      epfEmployee: extracted.epfEmployee ?? 0,
-      pcb: extracted.pcb ?? 0,
-      yearOfAssessment: extracted.yearOfAssessment,
-      socsoEmployee: extracted.socsoEmployee,
-      eisEmployee: extracted.eisEmployee,
+function extractYear(text: string): number | undefined {
+  const yearCandidates = new Set<number>()
+  const addYear = (value: string) => {
+    const y = Number.parseInt(value, 10)
+    if (Number.isFinite(y) && y >= 2018 && y <= new Date().getFullYear() + 1) {
+      yearCandidates.add(y)
     }
   }
 
-  // Fallback to GLM only if regex couldn't find the required fields
-  const truncatedText = text.slice(0, 4000)
-  const messages = buildExtractEAPrompt({ text: truncatedText })
-  const response = await glmClient.chat(messages)
+  const strongYearPatterns = [
+    /(?:tahun\s+taksiran|year\s+of\s+assessment)[^\d]*(20\d{2})/gi,
+    /(?:bagi\s+tahun\s+berakhir|year\s+ended)[^\d]*(20\d{2})/gi,
+  ]
 
-  const jsonMatch = response.match(/\{[\s\S]*\}/)
-  if (!jsonMatch) throw new Error('Failed to extract structured data from EA Form')
+  for (const pattern of strongYearPatterns) {
+    let match: RegExpExecArray | null
+    while ((match = pattern.exec(text)) !== null) {
+      addYear(match[1])
+    }
+  }
 
-  const data = JSON.parse(jsonMatch[0]) as EAData
+  if (yearCandidates.size > 0) {
+    return Math.max(...Array.from(yearCandidates))
+  }
 
-  if (!data.grossIncome || !data.yearOfAssessment) {
-    throw new Error('Could not read required fields from EA Form. Please ensure the PDF is not scanned/image-only.')
+  return undefined
+}
+
+function findAmountNearLabel(text: string, labelPattern: RegExp, searchWindow = 260): number | undefined {
+  const amountPattern = /\b\d{1,3}(?:,\d{3})*(?:\.\d{2})\b/g
+  let best: number | undefined
+  let match: RegExpExecArray | null
+
+  while ((match = labelPattern.exec(text)) !== null) {
+    const segment = text.slice(match.index, match.index + searchWindow)
+    const amounts = Array.from(segment.matchAll(amountPattern))
+      .map((m) => num(m[0]))
+      .filter((v) => Number.isFinite(v) && v >= 0)
+
+    if (amounts.length === 0) continue
+
+    const candidate = amounts[amounts.length - 1]
+    if (best === undefined || candidate > best) best = candidate
+  }
+
+  return best
+}
+
+function parseEAFromText(text: string): StrictExtractResult {
+  const lower = text.toLowerCase()
+  const looksLikeEA =
+    lower.includes('borang ea') ||
+    lower.includes('penyata gaji pekerja') ||
+    lower.includes('c.p.8a')
+
+  if (!looksLikeEA) {
+    throw new Error('Uploaded file does not look like a Borang EA document.')
+  }
+
+  const year = extractYear(text)
+  const grossIncome = findAmountNearLabel(
+    text,
+    /(?:gaji\s+kasar|gross\s+salary|pendapatan\s+penggajian|jumlah\s+pendapatan\s+penggajian)/gi,
+  )
+  const pcb = findAmountNearLabel(
+    text,
+    /(?:potongan\s+cukai\s+bulanan|pcb|mtd|cukai\s+berjadual)/gi,
+  )
+  const epf = findAmountNearLabel(
+    text,
+    /(?:kwsp|epf|kumpulan\s+wang\s+simpanan)/gi,
+  )
+  const socso = findAmountNearLabel(text, /(?:perkeso|socso)/gi)
+  const eis = findAmountNearLabel(text, /(?:\beis\b|\bsip\b)/gi)
+
+  if (!year || !grossIncome || grossIncome < 1000) {
+    throw new Error('Could not confidently extract EA gross income and tax year. Please upload a clearer text-based EA PDF.')
   }
 
   return {
-    grossIncome: Number(data.grossIncome),
-    epfEmployee: Number(data.epfEmployee ?? 0),
-    pcb: Number(data.pcb ?? 0),
-    yearOfAssessment: Number(data.yearOfAssessment),
-    socsoEmployee: data.socsoEmployee ? Number(data.socsoEmployee) : undefined,
-    eisEmployee: data.eisEmployee ? Number(data.eisEmployee) : undefined,
+    parser: 'strict-ea',
+    yearOfAssessment: year,
+    grossIncome,
+    pcb: pcb ?? 0,
+    epfEmployee: epf ?? 0,
+    socsoEmployee: socso,
+    eisEmployee: eis,
+  }
+}
+
+function parseBusinessDocument(text: string, mode: Extract<FilingMode, 'sme' | 'freelancer'>): StrictExtractResult {
+  const year = extractYear(text) ?? new Date().getFullYear() - 1
+  const grossIncome =
+    findAmountNearLabel(
+      text,
+      /(?:revenue|turnover|sales|hasil\s+jualan|pendapatan\s+perniagaan|business\s+income|jumlah\s+pendapatan)/gi,
+      320,
+    ) ??
+    findAmountNearLabel(
+      text,
+      /(?:total|jumlah)/gi,
+      200,
+    )
+
+  if (!grossIncome || grossIncome < 1000) {
+    throw new Error(
+      mode === 'sme'
+        ? 'Could not confidently extract revenue from the P&L statement. Please upload a clear text-based P&L with Revenue/Turnover line.'
+        : 'Could not confidently extract total income from invoices/receipts. Please upload a clear text-based statement with a Total amount.'
+    )
+  }
+
+  return {
+    parser: 'strict-business',
+    yearOfAssessment: year,
+    grossIncome,
+    epfEmployee: 0,
+    pcb: 0,
+  }
+}
+
+export async function parseUploadedForm(buffer: Buffer, mode: FilingMode): Promise<EAData> {
+  const parsed = await pdfParse(buffer)
+  const text = normalizeText(parsed.text)
+
+  if (!text.trim()) {
+    throw new Error('No extractable text found in PDF. Please upload a text-based PDF (not image-only scan).')
+  }
+
+  const result =
+    mode === 'individual'
+      ? parseEAFromText(text)
+      : parseBusinessDocument(text, mode)
+
+  return {
+    grossIncome: result.grossIncome,
+    epfEmployee: result.epfEmployee,
+    pcb: result.pcb,
+    yearOfAssessment: result.yearOfAssessment,
+    socsoEmployee: result.socsoEmployee,
+    eisEmployee: result.eisEmployee,
   }
 }

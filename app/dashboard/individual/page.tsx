@@ -14,7 +14,7 @@ export default function IndividualDashboardPage() {
 
         <div className="space-y-4">
           <Link
-            href="/upload"
+            href="/upload?mode=individual"
             className="flex items-center justify-between bg-white border-2 border-blue-200 rounded-xl p-5 hover:bg-blue-50 transition"
           >
             <div>
