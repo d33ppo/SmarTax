@@ -91,7 +91,8 @@ export async function POST(req: NextRequest) {
     }
 
     const supabase = createClient()
-    const { data: filing, error: filingError } = await (supabase.from('filings') as any)
+    const { data: filing, error: filingError } = await supabase
+      .from('filings')
       .select('id, mode, gross_income, total_deductions, answers, deducts')
       .eq('id', filingId)
       .single()
@@ -240,7 +241,8 @@ export async function POST(req: NextRequest) {
     const existingAnswers = typeof filing.answers === 'object' && filing.answers ? filing.answers : {}
     const existingDeducts = typeof filing.deducts === 'object' && filing.deducts ? filing.deducts : {}
 
-    const { error: updateError } = await (supabase.from('filings') as any)
+    const { error: updateError } = await supabase
+      .from('filings')
       .update({
         mode: 'sme',
         status: 'completed',

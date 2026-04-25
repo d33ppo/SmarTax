@@ -31,7 +31,6 @@ describe('SME Tax Calculation Engine (TC-05, TC-06, TC-07)', () => {
     // Band 2: RM450k @ 17% = RM76,500
     // Band 3: RM300k @ 24% = RM72,000
     // Subtotal: RM171,000
-    const taxableIncome = qualifiedBusiness.grossIncome - qualifiedBusiness.deductions
     expect(result.isSmeRateEligible).toBe(true)
     expect(result.band1Tax).toBe(150000 * 0.15) // RM22,500
     expect(result.band2Tax).toBe(450000 * 0.17) // RM76,500

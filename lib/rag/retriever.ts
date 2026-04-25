@@ -8,6 +8,13 @@ export interface Chunk {
   similarity: number
 }
 
+type RulingRow = {
+  id?: string | number
+  content?: string
+  citation?: string
+  source?: string
+}
+
 export async function retrieve(query: string, topK = 5): Promise<Chunk[]> {
   console.log("Retrieve called with query:", query, "topK:", topK)
 
@@ -33,9 +40,13 @@ export async function retrieve(query: string, topK = 5): Promise<Chunk[]> {
 
   console.log("Raw data returned:", JSON.stringify(data, null, 2))
 
-  const result = (data as any[]).map(d => ({
-    ...d,
-    similarity: 1 // Placeholder for similarity
+  const rows = Array.isArray(data) ? (data as RulingRow[]) : []
+  const result: Chunk[] = rows.map((d) => ({
+    id: String(d.id ?? ''),
+    content: String(d.content ?? ''),
+    citation: String(d.citation ?? ''),
+    source: String(d.source ?? ''),
+    similarity: 1,
   }))
 
   console.log("Processed result:", JSON.stringify(result, null, 2))

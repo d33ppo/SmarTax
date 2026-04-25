@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useParams } from 'next/navigation'
 import ScenarioSlider from '@/components/tax/ScenarioSlider'
 
@@ -18,22 +18,28 @@ export default function SimulatorPage() {
   const [result, setResult] = useState<ScenarioResult | null>(null)
   const [loading, setLoading] = useState(false)
 
-  useEffect(() => {
-    const timeout = setTimeout(() => runScenario(), 500)
-    return () => clearTimeout(timeout)
-  }, [epfContribution, lifeInsurance, educationFee])
+  const filingIdValue = Array.isArray(filingId) ? filingId[0] : filingId
 
-  async function runScenario() {
+  const runScenario = useCallback(async () => {
+    if (!filingIdValue) {
+      return
+    }
+
     setLoading(true)
     const res = await fetch('/api/scenario', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ filingId, epfContribution, lifeInsurance, educationFee }),
+      body: JSON.stringify({ filingId: filingIdValue, epfContribution, lifeInsurance, educationFee }),
     })
     const data = await res.json()
     setResult(data)
     setLoading(false)
-  }
+  }, [filingIdValue, epfContribution, lifeInsurance, educationFee])
+
+  useEffect(() => {
+    const timeout = setTimeout(() => runScenario(), 500)
+    return () => clearTimeout(timeout)
+  }, [runScenario])
 
   return (
     <div className="min-h-screen bg-gray-50 px-6 py-12">

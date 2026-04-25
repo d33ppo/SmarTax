@@ -90,7 +90,8 @@ export async function POST(req: NextRequest) {
       },
     }
 
-    const { data, error } = await (supabase.from('filings') as any)
+    const { data, error } = await supabase
+      .from('filings')
       .insert(filingPayload)
       .select('id')
       .single()

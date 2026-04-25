@@ -5,11 +5,11 @@ interface Props {
 }
 
 const LINE_ITEMS = [
-  { label: 'Gross Employment Income', key: 'gross_income' },
-  { label: 'EPF Contribution (Employee)', key: 'epf_employee', deduction: true },
-  { label: 'Total Reliefs', key: 'total_reliefs', deduction: true },
-  { label: 'Chargeable Income', key: 'taxable_income_after_reliefs', highlight: true },
-  { label: 'Tax Payable', key: 'calculated_tax_after_reliefs', highlight: true },
+  { label: 'Gross Employment Income', key: 'gross_income' as const },
+  { label: 'EPF Contribution (Employee)', key: 'epf_employee' as const, deduction: true },
+  { label: 'Total Reliefs', key: 'total_reliefs' as const, deduction: true },
+  { label: 'Chargeable Income', key: 'taxable_income_after_reliefs' as const, highlight: true },
+  { label: 'Tax Payable', key: 'calculated_tax_after_reliefs' as const, highlight: true },
 ]
 
 export default function TaxBreakdown({ filing }: Props) {
@@ -20,7 +20,7 @@ export default function TaxBreakdown({ filing }: Props) {
       </div>
       <div className="divide-y divide-gray-50">
         {LINE_ITEMS.map((item) => {
-          const value = (filing as any)[item.key] ?? 0
+          const value = Number(filing[item.key] ?? 0)
           return (
             <div
               key={item.key}
