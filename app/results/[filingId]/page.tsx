@@ -9,11 +9,25 @@ interface Props {
   params: Promise<{ filingId: string }>
 }
 
+type FilingRelief = {
+  code: string
+  name_en?: string
+  amount?: number
+  eligibilityRules?: {
+    description_en?: string
+  }
+  citation?: {
+    itaSection?: string
+    url?: string
+  }
+}
+
 export default async function ResultsPage({ params }: Props) {
   const supabase = createClient()
   const resolvedParams = await params
 
-  const { data: filing, error } = await (supabase.from('filings') as any)
+  const { data: filing, error } = await supabase
+    .from('filings')
     .select('*')
     .eq('id', resolvedParams.filingId)
     .single()
@@ -39,7 +53,7 @@ export default async function ResultsPage({ params }: Props) {
         <div>
           <h2 className="text-xl font-bold text-gray-900 mb-4">Reliefs Applied</h2>
           <div className="space-y-3">
-            {filing.reliefs?.map((relief: any) => (
+            {(Array.isArray(filing.reliefs) ? (filing.reliefs as FilingRelief[]) : []).map((relief) => (
               <ReliefCard key={relief.code} relief={{
                 id: relief.code,
                 name: relief.name_en,

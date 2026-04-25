@@ -30,9 +30,9 @@ const SAMPLE_ACTIONS: Action[] = [
   },
 ]
 
-export default function ActionPlan({ filingId: _ }: Props) {
+export default function ActionPlan({ filingId }: Props) {
   return (
-    <div>
+    <div data-filing-id={filingId}>
       <h2 className="text-xl font-bold text-gray-900 mb-4">Pre-Year-End Action Plan</h2>
       <div className="space-y-3">
         {SAMPLE_ACTIONS.map((action, i) => (

@@ -78,7 +78,14 @@ describe('P&L Form Component (TC-01, TC-02)', () => {
 // MOCK FUNCTION: submitPLForm
 // In real code, this would be imported from your API
 // ============================================================================
-function submitPLForm(formData: any) {
+type PLFormData = {
+  businessName?: string
+  grossIncome?: number | string
+  cogs?: number
+  operatingExpenses?: number
+}
+
+function submitPLForm(formData: PLFormData) {
   // Validation logic
   if (!formData.businessName) {
     return {

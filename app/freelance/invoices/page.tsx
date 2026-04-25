@@ -1,19 +1,16 @@
 'use client'
 
-import { useState, useMemo, ElementType } from 'react'
+import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   User,
   Briefcase,
   Wallet,
-  Receipt,
   CheckCircle2,
   Plus,
   Trash2,
   ChevronRight,
   ChevronLeft,
-  Search,
-  AlertCircle,
   Building2,
   Calculator,
   Gift,
@@ -22,7 +19,7 @@ import {
   Loader
 } from 'lucide-react'
 import { calculateTax } from '@/lib/tax/engine'
-import { REBATES, applyRebates } from '@/lib/tax/rebates'
+import { applyRebates } from '@/lib/tax/rebates'
 
 interface ExpenseRow {
   id: string
@@ -34,7 +31,7 @@ interface ExpenseRow {
 // BORANG B TAX COMPUTATION TYPES
 // ============================================================
 
-interface BorangBData {
+export interface BorangBData {
   // A. Business Income Fields
   grossBusinessIncome: number
   openingStock: number
@@ -157,17 +154,17 @@ export default function FreelanceInvoicesPage() {
   // ============================================================
   // B. BUSINESS EXPENSES
   // ============================================================
-  const [expenseLoanInterest, setExpenseLoanInterest] = useState<number | ''>('')
-  const [expenseSalariesWages, setExpenseSalariesWages] = useState<number | ''>('')
-  const [expenseRentalLease, setExpenseRentalLease] = useState<number | ''>('')
-  const [expenseContracts, setExpenseContracts] = useState<number | ''>('')
-  const [expenseCommissions, setExpenseCommissions] = useState<number | ''>('')
-  const [expenseBadDebts, setExpenseBadDebts] = useState<number | ''>('')
-  const [expenseTravelTransport, setExpenseTravelTransport] = useState<number | ''>('')
-  const [expenseRepairsMaintenance, setExpenseRepairsMaintenance] = useState<number | ''>('')
-  const [expensePromotionAds, setExpensePromotionAds] = useState<number | ''>('')
-  const [expenseOthers, setExpenseOthers] = useState<number | ''>('')
-  const [nonAllowableExpenses, setNonAllowableExpenses] = useState<number | ''>('')
+  const [expenseLoanInterest] = useState<number | ''>('')
+  const [expenseSalariesWages] = useState<number | ''>('')
+  const [expenseRentalLease] = useState<number | ''>('')
+  const [expenseContracts] = useState<number | ''>('')
+  const [expenseCommissions] = useState<number | ''>('')
+  const [expenseBadDebts] = useState<number | ''>('')
+  const [expenseTravelTransport] = useState<number | ''>('')
+  const [expenseRepairsMaintenance] = useState<number | ''>('')
+  const [expensePromotionAds] = useState<number | ''>('')
+  const [expenseOthers] = useState<number | ''>('')
+  const [nonAllowableExpenses] = useState<number | ''>('')
 
   // Legacy expenses (for backward compatibility)
   const [expenses, setExpenses] = useState<ExpenseRow[]>([
@@ -245,7 +242,7 @@ export default function FreelanceInvoicesPage() {
   // ============================================================
   // LEGACY FIELDS (for backward compatibility)
   // ============================================================
-  const [grossIncome, setGrossIncome] = useState<number | ''>('')
+  const [grossIncome] = useState<number | ''>('')
 
   // ============================================================
   // TAX RELIEFS
@@ -258,7 +255,6 @@ export default function FreelanceInvoicesPage() {
   const [parentMedicalCare, setParentMedicalCare] = useState<number | ''>('')
   const [educationFees, setEducationFees] = useState<number | ''>('')
   const [zakatPaid, setZakatPaid] = useState<number | ''>('')
-  const [donations, setDonations] = useState<number | ''>('')
 
   // ============================================================
   // DERIVED CALCULATIONS (useMemo)
@@ -365,7 +361,13 @@ export default function FreelanceInvoicesPage() {
   // J. Total Income
   const totalIncome = useMemo(() => {
     return aggregateIncome - (angelInvestorDeduction || 0) - (businessLossBroughtFwd || 0) - (qualifyingProspectingExp || 0) - (totalDonationsAllowed || 0)
-  }, [aggregateIncome, totalDonationsAllowed])
+  }, [
+    aggregateIncome,
+    angelInvestorDeduction,
+    businessLossBroughtFwd,
+    qualifyingProspectingExp,
+    totalDonationsAllowed,
+  ])
 
   // K. Chargeable Income
   const chargeableIncome = useMemo(() => {
@@ -401,25 +403,9 @@ export default function FreelanceInvoicesPage() {
     section110Deduction, section132Relief, section133Relief])
 
   // Legacy calculations for backward compatibility
-  const totalGrossIncome = useMemo(() => {
-    return (employmentIncome || 0) + (rentalIncome || 0) + (interestRoyaltiesOther || 0) + (foreignIncomeReceived || 0)
-  }, [employmentIncome, rentalIncome, interestRoyaltiesOther, foreignIncomeReceived])
-
   const totalExpenses = useMemo(() => {
     return expenses.reduce((sum, exp) => sum + (exp.amount || 0), 0)
   }, [expenses])
-
-  const legacyNetIncome = useMemo(() => {
-    return (grossIncome || 0) - totalExpenses
-  }, [grossIncome, totalExpenses])
-
-  const totalDeductions = useMemo(() => {
-    return (Number(epf) || 0) + (Number(socso) || 0) + (Number(donations) || 0)
-  }, [epf, socso, donations])
-
-  const legacyChargeableIncome = useMemo(() => {
-    return (legacyNetIncome || 0) - (totalDeductions || 0)
-  }, [legacyNetIncome, totalDeductions])
 
   // ============================================================
   // HELPER FUNCTIONS
@@ -1212,7 +1198,7 @@ export default function FreelanceInvoicesPage() {
             </div>
 
             <div className="space-y-4">
-              {expenses.map((expense, idx) => (
+              {expenses.map((expense) => (
                 <div key={expense.id} className="bg-white border-2 border-slate-100 rounded-3xl p-5 shadow-sm space-y-4 relative overflow-hidden">
                   <div className="absolute top-0 right-0 p-4">
                     <button onClick={() => removeExpense(expense.id)} className="text-slate-300 hover:text-rose-500 transition">

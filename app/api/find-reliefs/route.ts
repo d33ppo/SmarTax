@@ -12,8 +12,8 @@ export async function POST(req: NextRequest) {
     const supabase = createClient()
 
     // Fetch filing
-    const { data: filing, error: filingError } = await (supabase
-      .from('filings') as any)
+    const { data: filing, error: filingError } = await supabase
+      .from('filings')
       .select('*')
       .eq('id', filingId)
       .maybeSingle()
@@ -51,8 +51,8 @@ export async function POST(req: NextRequest) {
     console.log(`[POST /api/find-reliefs] Missed reliefs`, missedReliefs)
 
     // Update filing
-    const { error: updateError } = await (supabase
-      .from('filings') as any)
+    const { error: updateError } = await supabase
+      .from('filings')
       .update({
         answers,
         total_reliefs: totalReliefs,
@@ -74,8 +74,8 @@ export async function POST(req: NextRequest) {
     console.log('[POST /api/find-reliefs] Eligible codes:', eligibleCodes)
 
     // Query relief IDs
-    const { data: reliefDefs, error: reliefError } = await (supabase
-      .from('reliefs_master') as any)
+    const { data: reliefDefs, error: reliefError } = await supabase
+      .from('reliefs_master')
       .select('id, code')
       .in('code', eligibleCodes)
 
@@ -98,8 +98,8 @@ export async function POST(req: NextRequest) {
       amount_max_allowed: r.maxAmount,
       confidence: r.confidence,
     }))
-    const { error: insertError } = await (supabase
-      .from('filing_reliefs') as any)
+    const { error: insertError } = await supabase
+      .from('filing_reliefs')
       .insert(reliefRows)
     if (insertError) {
       console.error(`[POST /api/find-reliefs] Relief insert error`, insertError)
