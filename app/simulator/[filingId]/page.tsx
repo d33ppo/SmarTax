@@ -77,16 +77,16 @@ export default function SimulatorPage() {
           <div className="mt-8 bg-blue-600 text-white rounded-2xl p-6">
             <p className="text-blue-200 text-sm mb-1">Projected Tax Savings</p>
             <p className="text-4xl font-bold mb-4">
-              RM {result.savings.toLocaleString()}
+              RM {(result.savings ?? 0).toLocaleString()}
             </p>
             <div className="flex gap-8 text-sm">
               <div>
                 <p className="text-blue-200">Current Tax</p>
-                <p className="font-semibold">RM {result.currentTax.toLocaleString()}</p>
+                <p className="font-semibold">RM {(result.currentTax ?? 0).toLocaleString()}</p>
               </div>
               <div>
                 <p className="text-blue-200">With Changes</p>
-                <p className="font-semibold">RM {result.projectedTax.toLocaleString()}</p>
+                <p className="font-semibold">RM {(result.projectedTax ?? 0).toLocaleString()}</p>
               </div>
             </div>
           </div>

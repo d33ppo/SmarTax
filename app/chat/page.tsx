@@ -1,6 +1,7 @@
-'use client'
+﻿'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
 
 interface Message {
   role: 'user' | 'assistant'
@@ -8,11 +9,15 @@ interface Message {
   citations?: string[]
 }
 
-export default function ChatPage() {
+function ChatContent() {
+  const searchParams = useSearchParams()
+  const filingId = searchParams.get('filingId')
   const [messages, setMessages] = useState<Message[]>([
     {
       role: 'assistant',
-      content: 'Hi! I\'m SmarTax. Ask me anything about Malaysian personal tax — I\'ll always cite the relevant LHDN ruling.',
+      content: filingId
+        ? 'Hi! I\'m SmarTax. I can see your current filing context and explain your tax outcome with LHDN-based reasoning.'
+        : 'Hi! I\'m SmarTax. Ask me anything about Malaysian personal tax ? I\'ll always cite the relevant LHDN ruling.',
     },
   ])
   const [input, setInput] = useState('')
@@ -35,7 +40,7 @@ export default function ChatPage() {
     const res = await fetch('/api/ask', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ question: userMessage, history: messages }),
+      body: JSON.stringify({ question: userMessage, history: messages, filingId }),
     })
     const data = await res.json()
 
@@ -50,7 +55,11 @@ export default function ChatPage() {
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <div className="border-b bg-white px-6 py-4">
         <h1 className="font-semibold text-gray-900">Ask SmarTax</h1>
-        <p className="text-xs text-gray-400">Answers grounded in LHDN Public Rulings</p>
+        <p className="text-xs text-gray-400">
+          {filingId
+            ? `Context-aware mode for filing ${filingId} + LHDN Public Rulings`
+            : 'Answers grounded in LHDN Public Rulings'}
+        </p>
       </div>
 
       <div className="flex-1 overflow-y-auto px-6 py-6 space-y-4 max-w-3xl mx-auto w-full">
@@ -116,3 +125,12 @@ export default function ChatPage() {
     </div>
   )
 }
+
+export default function ChatPage() {
+  return (
+    <Suspense fallback={<div>Loading chat...</div>}>
+      <ChatContent />
+    </Suspense>
+  )
+}
+

@@ -1,18 +1,21 @@
 export interface Filing {
   id: string
   user_id: string | null
-  gross_income: number
-  epf_employee: number
-  pcb: number
-  year_of_assessment: number
-  answers: Record<string, unknown> | null
-  tax_without_reliefs: number | null
-  tax_with_reliefs: number | null
-  chargeable_income: number | null
-  total_reliefs: number | null
-  raw_data: Record<string, unknown> | null
+  gross_income: number | null
+  total_reliefs: number
+  total_deductions: number | null
+  ea_chargeable_income: number | null   // looks truncated, probably ea_chargeable_income
+  taxable_income_after_reliefs: number           // truncated, likely taxable_income_before_reliefs
+  calculated_tax_before_reliefs: number         // truncated, likely calculated_tax_before_reliefs
+  calculated_tax_after_reliefs: number | null  // truncated, likely calculated_tax_after_reliefs
+  deducts: Record<string, any> | null
+  reliefs: Record<string, any> | null
+  answers: Record<string, any> | null
+  potential_savings: number | null
+  missed_reliefs: Record<string, any> | null
+  status: string
   created_at: string
-  reliefs?: FilingRelief[]
+  updated_at: string
 }
 
 export interface FilingRelief {
