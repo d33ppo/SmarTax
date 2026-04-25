@@ -72,13 +72,13 @@ export async function POST(req: NextRequest) {
     const filingInsert: FilingInsertPayload = {
       user_id: null,
       gross_income: eaData.grossIncome,
-      epf_employee: eaData.epfEmployee,
+      total_deductions: eaData.epfEmployee,
       pcb: eaData.pcb,
       year_of_assessment: eaData.yearOfAssessment,
       answers: null,
-      tax_without_reliefs: null,
-      tax_with_reliefs: null,
-      chargeable_income: null,
+      calculated_tax_before_reliefs: null,
+      calculated_tax_after_reliefs: null,
+      taxable_income_after_reliefs: null,
       total_reliefs: null,
       raw_data: rawData,
     }

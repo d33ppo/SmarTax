@@ -14,7 +14,7 @@ export default function MissedMoneyCard({ taxableWithout, taxableWith, currency 
         You could have saved
       </p>
       <p className="text-6xl font-bold mb-1">
-        {currency} {savings.toLocaleString()}
+        {currency} {(savings ?? 0).toLocaleString()}
       </p>
       <p className="text-blue-200 text-sm mb-6">
         That&apos;s {pct}% less tax than you paid — legally.
@@ -24,13 +24,13 @@ export default function MissedMoneyCard({ taxableWithout, taxableWith, currency 
         <div>
           <p className="text-blue-200 text-xs uppercase tracking-wide mb-1">Without reliefs</p>
           <p className="text-xl font-semibold">
-            {currency} {taxableWithout.toLocaleString()}
+            {currency} {(taxableWithout ?? 0).toLocaleString()}
           </p>
         </div>
         <div>
           <p className="text-blue-200 text-xs uppercase tracking-wide mb-1">With all reliefs</p>
           <p className="text-xl font-semibold text-green-300">
-            {currency} {taxableWith.toLocaleString()}
+            {currency} {(taxableWith ?? 0).toLocaleString()}
           </p>
         </div>
       </div>

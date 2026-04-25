@@ -29,8 +29,8 @@ export default async function ResultsPage({ params }: Props) {
         </div>
 
         <MissedMoneyCard
-          taxableWithout={filing.tax_without_reliefs}
-          taxableWith={filing.tax_with_reliefs}
+          taxableWithout={filing.calculated_tax_before_reliefs}
+          taxableWith={filing.calculated_tax_after_reliefs}
           currency="RM"
         />
 
@@ -54,18 +54,12 @@ export default async function ResultsPage({ params }: Props) {
 
         <ActionPlan filingId={resolvedParams.filingId} />
 
-        <div className="flex gap-4">
-          <a
-            href={`/simulator/${resolvedParams.filingId}`}
-            className="flex-1 text-center bg-blue-600 text-white py-3 rounded-xl font-medium hover:bg-blue-700 transition"
-          >
-            Try Scenario Simulator →
-          </a>
+        <div className="flex">
           <a
             href="/chat"
-            className="flex-1 text-center border border-gray-300 text-gray-700 py-3 rounded-xl font-medium hover:bg-gray-50 transition"
+            className="flex-1 text-center bg-blue-600 text-white py-3 rounded-xl font-medium hover:bg-blue-700 transition"
           >
-            Ask SmarTax
+            Ask SmarTax →
           </a>
         </div>
       </div>
