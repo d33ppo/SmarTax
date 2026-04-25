@@ -178,7 +178,7 @@ components/     UI + domain components (tax/, ui/, layout/)
 lib/            Core logic (tax engine, AI, OCR, RAG)
 types/          TypeScript interfaces
 scripts/        DB seed + ingestion pipelines
-docs/           Architecture + demo scripts
+docs/           Architecture + demo scripts + **SAD, PRD and QATD pdf**
 ```
 
 ---
