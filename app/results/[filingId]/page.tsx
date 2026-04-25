@@ -14,7 +14,7 @@ export default async function ResultsPage({ params }: Props) {
   const resolvedParams = await params
 
   const { data: filing, error } = await (supabase.from('filings') as any)
-    .select('*, reliefs(*)')
+    .select('*')
     .eq('id', resolvedParams.filingId)
     .single()
 
@@ -39,15 +39,15 @@ export default async function ResultsPage({ params }: Props) {
         <div>
           <h2 className="text-xl font-bold text-gray-900 mb-4">Reliefs Applied</h2>
           <div className="space-y-3">
-            {filing.reliefs?.map((relief: {
-              id: string
-              name: string
-              amount: number
-              ruling_citation: string
-              ruling_url: string
-              description: string
-            }) => (
-              <ReliefCard key={relief.id} relief={relief} />
+            {filing.reliefs?.map((relief: any) => (
+              <ReliefCard key={relief.code} relief={{
+                id: relief.code,
+                name: relief.name_en,
+                amount: relief.amount,
+                description: relief.eligibilityRules?.description_en || '',
+                ruling_citation: relief.citation?.itaSection || '',
+                ruling_url: relief.citation?.url || '',
+              }} />
             ))}
           </div>
         </div>

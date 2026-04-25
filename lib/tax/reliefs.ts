@@ -12,12 +12,12 @@
  * Last verified: April 2026
  */
 
-import type { Relief } from '@/types/relief'
 
 // ============================================================
 // TYPE DEFINITION (matches build pack + DB schema)
 // ============================================================
 export interface ReliefDefinition {
+  id?: string
   code: string
   name_en: string
   name_ms: string
