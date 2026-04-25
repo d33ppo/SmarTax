@@ -8,8 +8,8 @@ const LINE_ITEMS = [
   { label: 'Gross Employment Income', key: 'gross_income' },
   { label: 'EPF Contribution (Employee)', key: 'epf_employee', deduction: true },
   { label: 'Total Reliefs', key: 'total_reliefs', deduction: true },
-  { label: 'Chargeable Income', key: 'chargeable_income', highlight: true },
-  { label: 'Tax Payable', key: 'tax_with_reliefs', highlight: true },
+  { label: 'Chargeable Income', key: 'taxable_income_after_reliefs', highlight: true },
+  { label: 'Tax Payable', key: 'calculated_tax_after_reliefs', highlight: true },
 ]
 
 export default function TaxBreakdown({ filing }: Props) {

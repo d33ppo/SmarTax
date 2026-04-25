@@ -1,6 +1,45 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { parseEAForm } from '@/lib/pdf/parser'
 import { createClient } from '@/lib/supabase/server'
+import { extractBasicEADataFromText, extractOCRTextFromEAUpload } from '@/lib/ocr/ea'
+
+type FilingInsertPayload = Record<string, unknown>
+
+function getMissingColumnFromSupabaseError(error: unknown): string | null {
+  if (!error || typeof error !== 'object') return null
+  const message = 'message' in error ? String(error.message || '') : ''
+  const match = message.match(/Could not find the '([^']+)' column/i)
+  return match?.[1] ?? null
+}
+
+async function insertFilingWithSchemaFallback(
+  supabase: ReturnType<typeof createClient>,
+  payload: FilingInsertPayload
+) {
+  const maxAttempts = 6
+  const workingPayload: FilingInsertPayload = { ...payload }
+
+  for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+    const { data, error } = await supabase
+      .from('filings')
+      .insert(workingPayload as never)
+      .select('id')
+      .single()
+
+    if (!error) {
+      return { data, error: null }
+    }
+
+    const missingColumn = getMissingColumnFromSupabaseError(error)
+    if (!missingColumn || !(missingColumn in workingPayload)) {
+      return { data: null, error }
+    }
+
+    delete workingPayload[missingColumn]
+    console.warn(`extract-ea: removed missing filings column '${missingColumn}' and retrying insert`)
+  }
+
+  return { data: null, error: new Error('Failed to insert filing after schema fallback retries') }
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -12,23 +51,54 @@ export async function POST(req: NextRequest) {
     }
 
     const buffer = Buffer.from(await file.arrayBuffer())
-    const eaData = await parseEAForm(buffer)
+    const ocrResult = await extractOCRTextFromEAUpload(buffer, {
+      mimeType: file.type,
+      fileName: file.name,
+    })
+    const eaData = extractBasicEADataFromText(ocrResult.text, file.name)
+
+    console.log(`\n========== EA OCR RESULT START (${file.name}) ==========`)
+    console.log(ocrResult.text || '[EMPTY OCR OUTPUT]')
+    console.log('========== EA OCR RESULT END ==========')
+
+    const rawData = JSON.parse(
+      JSON.stringify({
+        ...eaData,
+        extractionMethod: ocrResult.method,
+        ocrText: ocrResult.text,
+      })
+    )
+
+    const filingInsert: FilingInsertPayload = {
+      user_id: null,
+      gross_income: eaData.grossIncome,
+      total_deductions: eaData.epfEmployee,
+      pcb: eaData.pcb,
+      year_of_assessment: eaData.yearOfAssessment,
+      answers: null,
+      calculated_tax_before_reliefs: null,
+      calculated_tax_after_reliefs: null,
+      taxable_income_after_reliefs: null,
+      total_reliefs: null,
+      raw_data: rawData,
+    }
 
     const supabase = createClient()
-    const { data: filing, error } = await (supabase.from('filings') as any)
-      .insert({
-        gross_income: eaData.grossIncome,
-        epf_employee: eaData.epfEmployee,
-        pcb: eaData.pcb,
-        year_of_assessment: eaData.yearOfAssessment,
-        raw_data: eaData,
-      })
-      .select('id')
-      .single()
+    const { data: filing, error } = await insertFilingWithSchemaFallback(supabase, filingInsert)
 
     if (error) throw error
+    const filingId = (filing as { id: string } | null)?.id
 
-    return NextResponse.json({ filingId: filing.id, data: eaData })
+    if (!filingId) {
+      throw new Error('Failed to create filing record')
+    }
+
+    return NextResponse.json({
+      filingId,
+      employeeName: null,
+      data: eaData,
+      ocrText: ocrResult.text,
+    })
   } catch (err) {
     console.error('extract-ea error:', err)
     return NextResponse.json({ error: 'Failed to process EA Form' }, { status: 500 })

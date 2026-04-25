@@ -14,7 +14,7 @@ export default async function ResultsPage({ params }: Props) {
   const resolvedParams = await params
 
   const { data: filing, error } = await (supabase.from('filings') as any)
-    .select('*, reliefs(*)')
+    .select('*')
     .eq('id', resolvedParams.filingId)
     .single()
 
@@ -29,8 +29,8 @@ export default async function ResultsPage({ params }: Props) {
         </div>
 
         <MissedMoneyCard
-          taxableWithout={filing.tax_without_reliefs}
-          taxableWith={filing.tax_with_reliefs}
+          taxableWithout={filing.calculated_tax_before_reliefs}
+          taxableWith={filing.calculated_tax_after_reliefs}
           currency="RM"
         />
 
@@ -39,33 +39,27 @@ export default async function ResultsPage({ params }: Props) {
         <div>
           <h2 className="text-xl font-bold text-gray-900 mb-4">Reliefs Applied</h2>
           <div className="space-y-3">
-            {filing.reliefs?.map((relief: {
-              id: string
-              name: string
-              amount: number
-              ruling_citation: string
-              ruling_url: string
-              description: string
-            }) => (
-              <ReliefCard key={relief.id} relief={relief} />
+            {filing.reliefs?.map((relief: any) => (
+              <ReliefCard key={relief.code} relief={{
+                id: relief.code,
+                name: relief.name_en,
+                amount: relief.amount,
+                description: relief.eligibilityRules?.description_en || '',
+                ruling_citation: relief.citation?.itaSection || '',
+                ruling_url: relief.citation?.url || '',
+              }} />
             ))}
           </div>
         </div>
 
         <ActionPlan filingId={resolvedParams.filingId} />
 
-        <div className="flex gap-4">
-          <a
-            href={`/simulator/${resolvedParams.filingId}`}
-            className="flex-1 text-center bg-blue-600 text-white py-3 rounded-xl font-medium hover:bg-blue-700 transition"
-          >
-            Try Scenario Simulator →
-          </a>
+        <div className="flex">
           <a
             href="/chat"
-            className="flex-1 text-center border border-gray-300 text-gray-700 py-3 rounded-xl font-medium hover:bg-gray-50 transition"
+            className="flex-1 text-center bg-blue-600 text-white py-3 rounded-xl font-medium hover:bg-blue-700 transition"
           >
-            Ask SmarTax
+            Ask SmarTax →
           </a>
         </div>
       </div>

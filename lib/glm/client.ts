@@ -14,8 +14,8 @@ class GLMClient {
 
   constructor() {
     this.apiKey = process.env.GLM_API_KEY!
-    this.baseUrl = process.env.GLM_BASE_URL ?? 'https://open.bigmodel.cn/api/paas/v4'
-    this.model = 'glm-4-flash'
+    this.baseUrl = process.env.GLM_BASE_URL ?? 'https://api.ilmu.ai/v1'
+    this.model = 'ilmu-glm-5.1'
   }
 
   async chat(messages: ChatMessage[], temperature = 0.3): Promise<string> {
@@ -35,25 +35,6 @@ class GLMClient {
 
     const data: GLMResponse = await res.json()
     return data.choices[0].message.content
-  }
-
-  async embed(input: string | string[]): Promise<number[][]> {
-    const res = await fetch(`${this.baseUrl}/embeddings`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${this.apiKey}`,
-      },
-      body: JSON.stringify({ model: 'embedding-3', input }),
-    })
-
-    if (!res.ok) {
-      const err = await res.text()
-      throw new Error(`GLM Embed API error ${res.status}: ${err}`)
-    }
-
-    const data = await res.json()
-    return data.data.map((d: any) => d.embedding)
   }
 }
 

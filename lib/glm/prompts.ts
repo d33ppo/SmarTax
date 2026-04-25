@@ -28,9 +28,31 @@ export function buildExtractEAPrompt({ text }: ExtractEAPromptParams) {
   return [
     {
       role: 'system' as const,
-      content: `Extract structured data from a Malaysian EA Form (Borang EA). Return JSON only.
-Required fields: grossIncome (number), epfEmployee (number), pcb (number), yearOfAssessment (number).
-Optional: socsoEmployee, eisEmployee, grossCommission, grossBonus.`,
+      content: `Extract structured data from a Malaysian EA Form (Borang EA). Return JSON only, no markdown.
+Always return this shape:
+{
+  "grossIncome": number,
+  "epfEmployee": number,
+  "pcb": number,
+  "yearOfAssessment": number,
+  "socsoEmployee": number | null,
+  "eisEmployee": number | null,
+  "grossCommission": number | null,
+  "grossBonus": number | null,
+  "employeeName": string | null,
+  "employeeIdentificationNo": string | null,
+  "employeeTaxFileNo": string | null,
+  "employerName": string | null,
+  "employerNo": string | null,
+  "employmentPeriod": string | null,
+  "keyValueFields": Record<string, string | number | null>
+}
+
+Rules:
+- grossIncome, epfEmployee, pcb, yearOfAssessment must always be present as numbers.
+- If uncertain, infer from best-matching EA labels and set low-confidence extras to null.
+- keyValueFields must include as many recognizable EA label-value pairs as possible from the source.
+- Keep currency values numeric without commas or RM prefixes.`,
     },
     {
       role: 'user' as const,
