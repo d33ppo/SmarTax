@@ -1,15 +1,15 @@
 'use client'
 
 import { useState, useMemo, ElementType } from 'react'
-import { 
-  User, 
-  Briefcase, 
-  Wallet, 
-  Receipt, 
-  CheckCircle2, 
-  Plus, 
-  Trash2, 
-  ChevronRight, 
+import {
+  User,
+  Briefcase,
+  Wallet,
+  Receipt,
+  CheckCircle2,
+  Plus,
+  Trash2,
+  ChevronRight,
   ChevronLeft,
   Search,
   AlertCircle,
@@ -25,7 +25,7 @@ import { REBATES, applyRebates } from '@/lib/tax/rebates'
 interface ExpenseRow {
   id: string
   category: string
-  amount: number
+  amount: number | ''
 }
 
 // ============================================================
@@ -144,117 +144,117 @@ export default function FreelanceInvoicesPage() {
   // ============================================================
   // A. BUSINESS INCOME FIELDS
   // ============================================================
-  const [grossBusinessIncome, setGrossBusinessIncome] = useState(0)
-  const [openingStock, setOpeningStock] = useState(0)
-  const [purchases, setPurchases] = useState(0)
-  const [closingStock, setClosingStock] = useState(0)
-  const [otherBusinessIncome, setOtherBusinessIncome] = useState(0)
+  const [grossBusinessIncome, setGrossBusinessIncome] = useState<number | ''>('')
+  const [openingStock, setOpeningStock] = useState<number | ''>('')
+  const [purchases, setPurchases] = useState<number | ''>('')
+  const [closingStock, setClosingStock] = useState<number | ''>('')
+  const [otherBusinessIncome, setOtherBusinessIncome] = useState<number | ''>('')
 
   // ============================================================
   // B. BUSINESS EXPENSES
   // ============================================================
-  const [expenseLoanInterest, setExpenseLoanInterest] = useState(0)
-  const [expenseSalariesWages, setExpenseSalariesWages] = useState(0)
-  const [expenseRentalLease, setExpenseRentalLease] = useState(0)
-  const [expenseContracts, setExpenseContracts] = useState(0)
-  const [expenseCommissions, setExpenseCommissions] = useState(0)
-  const [expenseBadDebts, setExpenseBadDebts] = useState(0)
-  const [expenseTravelTransport, setExpenseTravelTransport] = useState(0)
-  const [expenseRepairsMaintenance, setExpenseRepairsMaintenance] = useState(0)
-  const [expensePromotionAds, setExpensePromotionAds] = useState(0)
-  const [expenseOthers, setExpenseOthers] = useState(0)
-  const [nonAllowableExpenses, setNonAllowableExpenses] = useState(0)
+  const [expenseLoanInterest, setExpenseLoanInterest] = useState<number | ''>('')
+  const [expenseSalariesWages, setExpenseSalariesWages] = useState<number | ''>('')
+  const [expenseRentalLease, setExpenseRentalLease] = useState<number | ''>('')
+  const [expenseContracts, setExpenseContracts] = useState<number | ''>('')
+  const [expenseCommissions, setExpenseCommissions] = useState<number | ''>('')
+  const [expenseBadDebts, setExpenseBadDebts] = useState<number | ''>('')
+  const [expenseTravelTransport, setExpenseTravelTransport] = useState<number | ''>('')
+  const [expenseRepairsMaintenance, setExpenseRepairsMaintenance] = useState<number | ''>('')
+  const [expensePromotionAds, setExpensePromotionAds] = useState<number | ''>('')
+  const [expenseOthers, setExpenseOthers] = useState<number | ''>('')
+  const [nonAllowableExpenses, setNonAllowableExpenses] = useState<number | ''>('')
 
   // Legacy expenses (for backward compatibility)
   const [expenses, setExpenses] = useState<ExpenseRow[]>([
-    { id: '1', category: '', amount: 0 }
+    { id: '1', category: '', amount: '' }
   ])
 
   // ============================================================
   // C. CAPITAL ALLOWANCES
   // ============================================================
-  const [capitalAllowanceCurrentYear, setCapitalAllowanceCurrentYear] = useState(0)
-  const [capitalAllowanceBroughtFwd, setCapitalAllowanceBroughtFwd] = useState(0)
+  const [capitalAllowanceCurrentYear, setCapitalAllowanceCurrentYear] = useState<number | ''>('')
+  const [capitalAllowanceBroughtFwd, setCapitalAllowanceBroughtFwd] = useState<number | ''>('')
 
   // ============================================================
   // D. BUSINESS LOSSES
   // ============================================================
-  const [businessLossBroughtFwd, setBusinessLossBroughtFwd] = useState(0)
-  const [businessLossCurrentYear, setBusinessLossCurrentYear] = useState(0)
+  const [businessLossBroughtFwd, setBusinessLossBroughtFwd] = useState<number | ''>('')
+  const [businessLossCurrentYear, setBusinessLossCurrentYear] = useState<number | ''>('')
 
   // ============================================================
   // E. OTHER INCOME SOURCES
   // ============================================================
-  const [employmentIncome, setEmploymentIncome] = useState(0)
-  const [rentalIncome, setRentalIncome] = useState(0)
-  const [interestRoyaltiesOther, setInterestRoyaltiesOther] = useState(0)
-  const [foreignIncomeReceived, setForeignIncomeReceived] = useState(0)
+  const [employmentIncome, setEmploymentIncome] = useState<number | ''>('')
+  const [rentalIncome, setRentalIncome] = useState<number | ''>('')
+  const [interestRoyaltiesOther, setInterestRoyaltiesOther] = useState<number | ''>('')
+  const [foreignIncomeReceived, setForeignIncomeReceived] = useState<number | ''>('')
 
   // ============================================================
   // F. PRE-INCOME DEDUCTIONS
   // ============================================================
-  const [angelInvestorDeduction, setAngelInvestorDeduction] = useState(0)
-  const [qualifyingProspectingExp, setQualifyingProspectingExp] = useState(0)
+  const [angelInvestorDeduction, setAngelInvestorDeduction] = useState<number | ''>('')
+  const [qualifyingProspectingExp, setQualifyingProspectingExp] = useState<number | ''>('')
 
   // ============================================================
   // G. DONATIONS
   // ============================================================
-  const [donationGovernment, setDonationGovernment] = useState(0)
-  const [donationApprovedInstitution, setDonationApprovedInstitution] = useState(0)
-  const [donationSports, setDonationSports] = useState(0)
-  const [donationNationalInterest, setDonationNationalInterest] = useState(0)
-  const [donationWakafEndowment, setDonationWakafEndowment] = useState(0)
-  const [donationArtefacts, setDonationArtefacts] = useState(0)
-  const [donationLibrary, setDonationLibrary] = useState(0)
-  const [donationDisabledFacilities, setDonationDisabledFacilities] = useState(0)
-  const [donationMedicalEquipment, setDonationMedicalEquipment] = useState(0)
-  const [donationArtGallery, setDonationArtGallery] = useState(0)
+  const [donationGovernment, setDonationGovernment] = useState<number | ''>('')
+  const [donationApprovedInstitution, setDonationApprovedInstitution] = useState<number | ''>('')
+  const [donationSports, setDonationSports] = useState<number | ''>('')
+  const [donationNationalInterest, setDonationNationalInterest] = useState<number | ''>('')
+  const [donationWakafEndowment, setDonationWakafEndowment] = useState<number | ''>('')
+  const [donationArtefacts, setDonationArtefacts] = useState<number | ''>('')
+  const [donationLibrary, setDonationLibrary] = useState<number | ''>('')
+  const [donationDisabledFacilities, setDonationDisabledFacilities] = useState<number | ''>('')
+  const [donationMedicalEquipment, setDonationMedicalEquipment] = useState<number | ''>('')
+  const [donationArtGallery, setDonationArtGallery] = useState<number | ''>('')
 
   // ============================================================
   // H. TAX PAYMENTS ALREADY MADE
   // ============================================================
-  const [mtdPaid, setMtdPaid] = useState(0)
-  const [cp500Installments, setCp500Installments] = useState(0)
-  const [section107dPayment, setSection107dPayment] = useState(0)
+  const [mtdPaid, setMtdPaid] = useState<number | ''>('')
+  const [cp500Installments, setCp500Installments] = useState<number | ''>('')
+  const [section107dPayment, setSection107dPayment] = useState<number | ''>('')
 
   // ============================================================
   // I. REBATES
   // ============================================================
-  const [rebateSelf, setRebateSelf] = useState(0)
-  const [rebateSpouse, setRebateSpouse] = useState(0)
-  const [rebateZakatFitrah, setRebateZakatFitrah] = useState(0)
-  const [rebateDepartureLevy, setRebateDepartureLevy] = useState(0)
+  const [rebateSelf, setRebateSelf] = useState<number | ''>('')
+  const [rebateSpouse, setRebateSpouse] = useState<number | ''>('')
+  const [rebateZakatFitrah, setRebateZakatFitrah] = useState<number | ''>('')
+  const [rebateDepartureLevy, setRebateDepartureLevy] = useState<number | ''>('')
 
   // ============================================================
   // J. DOUBLE TAXATION RELIEF
   // ============================================================
-  const [section110Deduction, setSection110Deduction] = useState(0)
-  const [section132Relief, setSection132Relief] = useState(0)
-  const [section133Relief, setSection133Relief] = useState(0)
+  const [section110Deduction, setSection110Deduction] = useState<number | ''>('')
+  const [section132Relief, setSection132Relief] = useState<number | ''>('')
+  const [section133Relief, setSection133Relief] = useState<number | ''>('')
 
   // ============================================================
   // K. JOINT ASSESSMENT
   // ============================================================
-  const [spouseTransferredIncome, setSpouseTransferredIncome] = useState(0)
+  const [spouseTransferredIncome, setSpouseTransferredIncome] = useState<number | ''>('')
   const [jointAssessmentType, setJointAssessmentType] = useState<'single' | 'joint' | 'separate'>('single')
 
   // ============================================================
   // LEGACY FIELDS (for backward compatibility)
   // ============================================================
-  const [grossIncome, setGrossIncome] = useState(0)
+  const [grossIncome, setGrossIncome] = useState<number | ''>('')
 
   // ============================================================
   // TAX RELIEFS
   // ============================================================
-  const [epf, setEpf] = useState(0)
-  const [lifeInsurance, setLifeInsurance] = useState(0)
-  const [socso, setSocso] = useState(0)
-  const [lifestyleExpenses, setLifestyleExpenses] = useState(0)
-  const [medicalExpenses, setMedicalExpenses] = useState(0)
-  const [parentMedicalCare, setParentMedicalCare] = useState(0)
-  const [educationFees, setEducationFees] = useState(0)
-  const [zakatPaid, setZakatPaid] = useState(0)
-  const [donations, setDonations] = useState(0)
+  const [epf, setEpf] = useState<number | ''>('')
+  const [lifeInsurance, setLifeInsurance] = useState<number | ''>('')
+  const [socso, setSocso] = useState<number | ''>('')
+  const [lifestyleExpenses, setLifestyleExpenses] = useState<number | ''>('')
+  const [medicalExpenses, setMedicalExpenses] = useState<number | ''>('')
+  const [parentMedicalCare, setParentMedicalCare] = useState<number | ''>('')
+  const [educationFees, setEducationFees] = useState<number | ''>('')
+  const [zakatPaid, setZakatPaid] = useState<number | ''>('')
+  const [donations, setDonations] = useState<number | ''>('')
 
   // ============================================================
   // DERIVED CALCULATIONS (useMemo)
@@ -298,13 +298,13 @@ export default function FreelanceInvoicesPage() {
 
   // E. Adjusted Business Income
   const adjustedBusinessIncome = useMemo(() => {
-    return netProfit - (capitalAllowanceCurrentYear || 0) - (capitalAllowanceBroughtFwd || 0)
-  }, [netProfit, capitalAllowanceCurrentYear, capitalAllowanceBroughtFwd])
+    return netProfit + (nonAllowableExpenses || 0) - (capitalAllowanceBroughtFwd || 0)
+  }, [netProfit, nonAllowableExpenses, capitalAllowanceBroughtFwd])
 
   // F. Statutory Business Income
   const statutoryBusinessIncome = useMemo(() => {
     const adjusted = adjustedBusinessIncome
-    const losses = businessLossBroughtFwd + businessLossCurrentYear
+    const losses = (businessLossBroughtFwd || 0) + (businessLossCurrentYear || 0)
     return Math.max(0, adjusted - losses)
   }, [adjustedBusinessIncome, businessLossBroughtFwd, businessLossCurrentYear])
 
@@ -322,7 +322,7 @@ export default function FreelanceInvoicesPage() {
   // H. Total Donations Allowed
   const totalDonationsAllowed = useMemo(() => {
     const grossIncomeForDonation = Math.max(0, aggregateIncome)
-    const totalDonations = 
+    const totalDonations =
       (donationGovernment || 0) +
       (donationApprovedInstitution || 0) +
       (donationSports || 0) +
@@ -333,12 +333,12 @@ export default function FreelanceInvoicesPage() {
       (donationDisabledFacilities || 0) +
       (donationMedicalEquipment || 0) +
       (donationArtGallery || 0)
-    
+
     // Donation capped at 10% of aggregate income
     return Math.min(totalDonations, grossIncomeForDonation * 0.10)
   }, [aggregateIncome, donationGovernment, donationApprovedInstitution, donationSports,
-      donationNationalInterest, donationWakafEndowment, donationArtefacts, donationLibrary,
-      donationDisabledFacilities, donationMedicalEquipment, donationArtGallery])
+    donationNationalInterest, donationWakafEndowment, donationArtefacts, donationLibrary,
+    donationDisabledFacilities, donationMedicalEquipment, donationArtGallery])
 
   // I. Total Reliefs
   const totalReliefs = useMemo(() => {
@@ -356,11 +356,11 @@ export default function FreelanceInvoicesPage() {
       (qualifyingProspectingExp || 0)
     )
   }, [epf, socso, lifeInsurance, medicalExpenses, parentMedicalCare, educationFees,
-      lifestyleExpenses, totalDonationsAllowed, angelInvestorDeduction, qualifyingProspectingExp])
+    lifestyleExpenses, totalDonationsAllowed, angelInvestorDeduction, qualifyingProspectingExp])
 
   // J. Total Income
   const totalIncome = useMemo(() => {
-    return aggregateIncome - totalDonationsAllowed
+    return aggregateIncome - (angelInvestorDeduction || 0) - (businessLossBroughtFwd || 0) - (qualifyingProspectingExp || 0) - (totalDonationsAllowed || 0)
   }, [aggregateIncome, totalDonationsAllowed])
 
   // K. Chargeable Income
@@ -385,7 +385,7 @@ export default function FreelanceInvoicesPage() {
 
   // N. Tax Payable (after rebates) using library function
   const taxPayable = useMemo(() => {
-    return applyRebates(grossTax, rebateZakatFitrah, jointAssessmentType === 'joint')
+    return applyRebates(grossTax, rebateZakatFitrah || 0, jointAssessmentType === 'joint')
   }, [grossTax, rebateZakatFitrah, jointAssessmentType])
 
   // O. Balance Tax Payable (after payments)
@@ -393,8 +393,8 @@ export default function FreelanceInvoicesPage() {
     const totalPaid = (mtdPaid || 0) + (cp500Installments || 0) + (section107dPayment || 0)
     const relief = (section110Deduction || 0) + (section132Relief || 0) + (section133Relief || 0)
     return Math.max(0, taxPayable - totalPaid - relief)
-  }, [taxPayable, mtdPaid, cp500Installments, section107dPayment, 
-      section110Deduction, section132Relief, section133Relief])
+  }, [taxPayable, mtdPaid, cp500Installments, section107dPayment,
+    section110Deduction, section132Relief, section133Relief])
 
   // Legacy calculations for backward compatibility
   const totalGrossIncome = useMemo(() => {
@@ -414,7 +414,7 @@ export default function FreelanceInvoicesPage() {
   }, [epf, socso, donations])
 
   const legacyChargeableIncome = useMemo(() => {
-    return (legacyNetIncome || 0) - (totalDeductions || 0) 
+    return (legacyNetIncome || 0) - (totalDeductions || 0)
   }, [legacyNetIncome, totalDeductions])
 
   // ============================================================
@@ -422,7 +422,7 @@ export default function FreelanceInvoicesPage() {
   // ============================================================
 
   const addExpense = () => {
-    setExpenses([...expenses, { id: Math.random().toString(36).substr(2, 9), category: '', amount: 0 }])
+    setExpenses([...expenses, { id: Math.random().toString(36).substr(2, 9), category: '', amount: '' }])
   }
 
   const removeExpense = (id: string) => {
@@ -436,66 +436,67 @@ export default function FreelanceInvoicesPage() {
   const nextStep = () => setStep(s => Math.min(s + 1, 8))
   const prevStep = () => setStep(s => Math.max(s - 1, 1))
 
-  const formatRM = (val: number) => {
-    return new Intl.NumberFormat('ms-MY', { style: 'currency', currency: 'MYR' }).format(val)
+  const formatRM = (val: number | '') => {
+    const num = typeof val === 'number' ? val : (val === '' ? 0 : Number(val))
+    return new Intl.NumberFormat('ms-MY', { style: 'currency', currency: 'MYR' }).format(num)
   }
 
   // ============================================================
   // NUMERIC INPUT COMPONENT
   // ============================================================
-  const NumericInput = ({ 
-  label, 
-  value, 
-  onChange, 
-  placeholder = "0.00",
-  icon: Icon 
-}: { 
-  label: string
-  value: number
-  onChange: (val: number) => void
-  placeholder?: string
-  icon?: React.ElementType
-}) => {
-  const [internalValue, setInternalValue] = useState(value.toString())
+  const NumericInput = ({
+    label,
+    value,
+    onChange,
+    placeholder = "0.00",
+    icon: Icon
+  }: {
+    label: string
+    value: number | ''
+    onChange: (val: number | '') => void
+    placeholder?: string
+    icon?: React.ElementType
+  }) => {
+    const [internalValue, setInternalValue] = useState(value === '' ? '' : value.toString())
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setInternalValue(e.target.value)
-  }
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      setInternalValue(e.target.value)
+    }
 
-  const handleBlur = () => {
-    const num = Number(internalValue)
-    onChange(isNaN(num) ? 0 : num)
-  }
+    const handleBlur = () => {
+      const num = Number(internalValue)
+      onChange(internalValue === '' ? '' : (isNaN(num) ? 0 : num))
+    }
 
-  return (
-    <div className="space-y-2">
-      <label className="text-sm font-semibold text-slate-700">{label}</label>
-      <div className="relative">
-        <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-slate-400">RM</span>
-        {Icon && <Icon className="absolute left-10 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />}
-        <input 
-          type="number" 
-          value={internalValue}
-          onChange={handleChange}
-          onBlur={handleBlur}
-          placeholder={placeholder}
-          className={`w-full pl-16 pr-4 py-3 rounded-xl border-2 border-slate-100 focus:border-blue-500 transition-all outline-none text-right font-mono ${Icon ? 'pl-20' : ''}`}
-        />
+    return (
+      <div className="space-y-2">
+        <label className="text-sm font-semibold text-slate-700">{label}</label>
+        <div className="relative">
+          <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-slate-400">RM</span>
+          {Icon && <Icon className="absolute left-10 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />}
+          <input
+            type="number"
+            value={internalValue}
+            onChange={handleChange}
+            onBlur={handleBlur}
+            placeholder={placeholder}
+            className={`w-full pl-16 pr-4 py-3 rounded-xl border-2 border-slate-100 focus:border-blue-500 transition-all outline-none text-right font-mono ${Icon ? 'pl-20' : ''}`}
+          />
+        </div>
       </div>
-    </div>
-  )
-}
+    )
+  }
 
 
   // ============================================================
   // SECTION CARD COMPONENT
   // ============================================================
-  const SectionCard = ({ 
-    title, 
-    icon: Icon, 
+  const SectionCard = ({
+    title,
+    icon: Icon,
     children,
     accentColor = "blue"
-  }: { 
+  }: {
     title: string
     icon: React.ElementType
     children: React.ReactNode
@@ -526,12 +527,12 @@ export default function FreelanceInvoicesPage() {
   // ============================================================
   // DERIVED FIELD DISPLAY CARD
   // ============================================================
-  const DerivedFieldCard = ({ 
-    label, 
-    value, 
+  const DerivedFieldCard = ({
+    label,
+    value,
     isNegative = false,
     highlight = false
-  }: { 
+  }: {
     label: string
     value: number
     isNegative?: boolean
@@ -565,7 +566,7 @@ export default function FreelanceInvoicesPage() {
       </div>
 
       <main className="max-w-xl mx-auto px-6 py-8">
-        
+
         {/* Step 1: Personal Info */}
         {step === 1 && (
           <div className="space-y-6 animate-in slide-in-from-right-4 duration-300">
@@ -580,8 +581,8 @@ export default function FreelanceInvoicesPage() {
             <div className="space-y-5">
               <div className="space-y-2">
                 <label className="text-sm font-bold text-slate-700">Full Name</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="As per NRIC"
@@ -590,8 +591,8 @@ export default function FreelanceInvoicesPage() {
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-bold text-slate-700">IC / Passport No.</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   value={ic}
                   onChange={(e) => setIc(e.target.value)}
                   placeholder="98010101xxxx"
@@ -600,7 +601,7 @@ export default function FreelanceInvoicesPage() {
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-bold text-slate-700">Tax Year</label>
-                <select 
+                <select
                   value={year}
                   onChange={(e) => setYear(e.target.value)}
                   className="w-full px-5 py-4 rounded-2xl border-2 border-slate-100 focus:border-blue-500 transition-all outline-none text-lg shadow-sm appearance-none bg-white"
@@ -612,7 +613,7 @@ export default function FreelanceInvoicesPage() {
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-bold text-slate-700">Assessment Type</label>
-                <select 
+                <select
                   value={jointAssessmentType}
                   onChange={(e) => setJointAssessmentType(e.target.value as 'single' | 'joint' | 'separate')}
                   className="w-full px-5 py-4 rounded-2xl border-2 border-slate-100 focus:border-blue-500 transition-all outline-none text-lg shadow-sm appearance-none bg-white"
@@ -670,80 +671,6 @@ export default function FreelanceInvoicesPage() {
               <DerivedFieldCard label="Cost of Sales" value={costOfSales} />
               <DerivedFieldCard label="Gross Profit" value={grossProfit} />
             </div>
-          </div>
-        )}
-
-        {/* Step 3: Business Expenses */}
-        {step === 3 && (
-          <div className="space-y-6 animate-in slide-in-from-right-4 duration-300">
-            <div className="text-center mb-6">
-              <div className="bg-rose-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Receipt className="text-rose-600 w-8 h-8" />
-              </div>
-              <h2 className="text-2xl font-bold text-slate-900">Business Expenses</h2>
-              <p className="text-slate-500 text-sm mt-2">Allowable business expenses</p>
-            </div>
-
-            <SectionCard title="Business Expenses" icon={Receipt} accentColor="rose">
-              <NumericInput
-                label="Loan Interest"
-                value={expenseLoanInterest}
-                onChange={setExpenseLoanInterest}
-              />
-              <NumericInput
-                label="Salaries & Wages"
-                value={expenseSalariesWages}
-                onChange={setExpenseSalariesWages}
-              />
-              <NumericInput
-                label="Rental & Lease"
-                value={expenseRentalLease}
-                onChange={setExpenseRentalLease}
-              />
-              <NumericInput
-                label="Contracts"
-                value={expenseContracts}
-                onChange={setExpenseContracts}
-              />
-              <NumericInput
-                label="Commissions"
-                value={expenseCommissions}
-                onChange={setExpenseCommissions}
-              />
-              <NumericInput
-                label="Bad Debts"
-                value={expenseBadDebts}
-                onChange={setExpenseBadDebts}
-              />
-              <NumericInput
-                label="Travel & Transport"
-                value={expenseTravelTransport}
-                onChange={setExpenseTravelTransport}
-              />
-              <NumericInput
-                label="Repairs & Maintenance"
-                value={expenseRepairsMaintenance}
-                onChange={setExpenseRepairsMaintenance}
-              />
-              <NumericInput
-                label="Promotion & Advertising"
-                value={expensePromotionAds}
-                onChange={setExpensePromotionAds}
-              />
-              <NumericInput
-                label="Other Expenses"
-                value={expenseOthers}
-                onChange={setExpenseOthers}
-              />
-              <NumericInput
-                label="Non-Allowable Expenses"
-                value={nonAllowableExpenses}
-                onChange={setNonAllowableExpenses}
-              />
-            </SectionCard>
-
-            {/* Derived Net Profit Display */}
-            <DerivedFieldCard label="Net Business Profit" value={netProfit} highlight />
           </div>
         )}
 
@@ -1073,11 +1000,11 @@ export default function FreelanceInvoicesPage() {
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-slate-500">Capital Allowances</span>
-                  <span className="font-medium">- {formatRM(capitalAllowanceCurrentYear + capitalAllowanceBroughtFwd)}</span>
+                  <span className="font-medium">- {formatRM((capitalAllowanceCurrentYear || 0) + (capitalAllowanceBroughtFwd || 0))}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-slate-500">Business Losses</span>
-                  <span className="font-medium">- {formatRM(businessLossBroughtFwd + businessLossCurrentYear)}</span>
+                  <span className="font-medium">- {formatRM((businessLossBroughtFwd || 0) + (businessLossCurrentYear || 0))}</span>
                 </div>
               </div>
 
@@ -1161,7 +1088,7 @@ export default function FreelanceInvoicesPage() {
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-slate-500">Double Tax Relief</span>
-                  <span className="font-medium">{formatRM(section110Deduction + section132Relief + section133Relief)}</span>
+                  <span className="font-medium">{formatRM((section110Deduction || 0) + (section132Relief || 0) + (section133Relief || 0))}</span>
                 </div>
               </div>
 
@@ -1196,43 +1123,6 @@ export default function FreelanceInvoicesPage() {
               </div>
             </div>
 
-            <button className="w-full bg-blue-600 text-white py-5 rounded-[2rem] font-black text-xl shadow-2xl shadow-blue-200 hover:scale-[1.02] transition-transform active:scale-95">
-              Submit Borang B
-            </button>
-          </div>
-        )}
-
-        {/* Legacy Step 2: Simple Income (for backward compatibility) */}
-        {step === 2 && grossBusinessIncome === 0 && (
-          <div className="space-y-8 animate-in slide-in-from-right-4 duration-300">
-            <div className="text-center">
-              <div className="bg-amber-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Wallet className="text-amber-600 w-8 h-8" />
-              </div>
-              <h2 className="text-2xl font-bold text-slate-900">Berapa Pendapatan Anda?</h2>
-              <p className="text-slate-500 text-sm mt-2">Masukkan jumlah keseluruhan pendapatan freelance anda untuk tahun ini.</p>
-            </div>
-
-            <div className="relative">
-              <span className="absolute left-6 top-1/2 -translate-y-1/2 text-3xl font-black text-slate-300">RM</span>
-              <input 
-                type="number" 
-                value={grossIncome}
-                onChange={(e) => setGrossIncome(e.target.value === '' ? 0 : Number(e.target.value))}
-                placeholder="0.00"
-                className="w-full pl-20 pr-6 py-10 rounded-[2.5rem] border-4 border-slate-50 bg-slate-50 focus:bg-white focus:border-amber-400 transition-all outline-none text-5xl font-black text-slate-900"
-                autoFocus
-              />
-            </div>
-            
-            <div className="bg-slate-50 p-6 rounded-3xl border-2 border-dashed border-slate-200">
-              <div className="flex gap-4">
-                <AlertCircle className="w-5 h-5 text-slate-400 shrink-0 mt-1" />
-                <p className="text-sm text-slate-500 leading-relaxed italic">
-                  Make sure to enter the amount after deducting any platform fees if applicable.
-                </p>
-              </div>
-            </div>
           </div>
         )}
 
@@ -1244,7 +1134,7 @@ export default function FreelanceInvoicesPage() {
                 <h2 className="text-xl font-bold text-slate-900">Expenses</h2>
                 <p className="text-sm text-slate-500 mt-1">Add your business expenses.</p>
               </div>
-              <button 
+              <button
                 onClick={addExpense}
                 className="bg-blue-600 text-white p-2 rounded-full shadow-lg shadow-blue-200"
               >
@@ -1260,10 +1150,10 @@ export default function FreelanceInvoicesPage() {
                       <Trash2 className="w-5 h-5" />
                     </button>
                   </div>
-                  
+
                   <div className="space-y-2">
                     <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">Category</label>
-                    <select 
+                    <select
                       value={expense.category}
                       onChange={(e) => updateExpense(expense.id, 'category', e.target.value)}
                       className="w-full px-0 py-1 bg-transparent border-b-2 border-slate-100 focus:border-blue-500 outline-none text-lg font-semibold"
@@ -1277,12 +1167,12 @@ export default function FreelanceInvoicesPage() {
                   <div className="space-y-2">
                     <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">Amount (RM)</label>
                     <div className="relative">
-                      <span className="absolute left-0 top-1 text-lg font-bold text-slate-900">RM</span>
-                      <input 
-                        type="number" 
+                      <span className="absolute left-6 top-1/2 -translate-y-1/2 font-bold text-slate-400">RM</span>
+                      <input
+                        type="number"
                         value={expense.amount}
-                        onChange={(e) => updateExpense(expense.id, 'amount', e.target.value === '' ? 0 : Number(e.target.value))}
-                        className="w-full pl-10 pr-4 py-1 bg-transparent border-b-2 border-slate-100 focus:border-blue-500 outline-none text-2xl font-black text-slate-900"
+                        onChange={(e) => updateExpense(expense.id, 'amount', e.target.value === '' ? '' : Number(e.target.value))}
+                        className="w-full pl-16 pr-6 py-3 rounded-2xl border-2 border-slate-50 bg-slate-50 focus:bg-white focus:border-blue-500 transition-all outline-none text-xl font-bold text-slate-900"
                       />
                     </div>
                   </div>
@@ -1318,12 +1208,12 @@ export default function FreelanceInvoicesPage() {
                 </div>
               </div>
 
-              <div className={`rounded-3xl p-8 border-4 ${legacyNetIncome >= 0 ? 'bg-emerald-50 border-emerald-100' : 'bg-rose-50 border-rose-100'}`}>
-                <p className={`text-xs font-bold uppercase tracking-widest mb-2 ${legacyNetIncome >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
-                  {legacyNetIncome >= 0 ? 'Net Profit' : 'Net Loss'}
+              <div className={`rounded-3xl p-8 border-4 ${netProfit >= 0 ? 'bg-emerald-50 border-emerald-100' : 'bg-rose-50 border-rose-100'}`}>
+                <p className={`text-xs font-bold uppercase tracking-widest mb-2 ${netProfit >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+                  {netProfit >= 0 ? 'Net Profit' : 'Net Loss'}
                 </p>
-                <p className={`text-4xl font-black ${legacyNetIncome >= 0 ? 'text-emerald-900' : 'text-rose-900'}`}>
-                  {formatRM(legacyNetIncome)}
+                <p className={`text-4xl font-black ${netProfit >= 0 ? 'text-emerald-900' : 'text-rose-900'}`}>
+                  {formatRM(netProfit || 0)}
                 </p>
               </div>
 
@@ -1338,17 +1228,13 @@ export default function FreelanceInvoicesPage() {
                 </div>
               </div>
             </div>
-
-            <button className="w-full bg-blue-600 text-white py-5 rounded-[2rem] font-black text-xl shadow-2xl shadow-blue-200 hover:scale-[1.02] transition-transform active:scale-95">
-              Submit
-            </button>
           </div>
         )}
 
         {/* Sticky Footer Navigation */}
         <div className="mt-12 flex gap-4">
           {step > 1 && (
-            <button 
+            <button
               onClick={prevStep}
               className="flex-1 bg-white border-2 border-slate-100 text-slate-500 py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-slate-50 transition"
             >
@@ -1356,7 +1242,7 @@ export default function FreelanceInvoicesPage() {
             </button>
           )}
           {step < 8 && (
-            <button 
+            <button
               onClick={nextStep}
               className="flex-[2] bg-slate-900 text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-slate-800 transition"
             >
