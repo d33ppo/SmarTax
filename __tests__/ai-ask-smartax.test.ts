@@ -113,7 +113,6 @@ describe('Ask SmarTax AI - GLM Output Validation (AI-01 to AI-05)', () => {
 
     // Define maximum input size
     const maxTokens = 1500
-    const maxWords = 800
     const estimatedTokens = hugePrompt.split(/\s+/).length * 1.3 // Rough estimate
 
     // Assert: One of two behaviors is acceptable
@@ -201,7 +200,11 @@ interface FilingContext {
   filingId?: string
   mode?: string
   grossIncome?: number
-  [key: string]: any
+  currentTax?: number
+  deductions?: number
+  reliefs?: Array<{ name: string; amount: number }>
+  possibleMissedReliefs?: string[]
+  [key: string]: unknown
 }
 
 interface GLMResponse {
@@ -250,7 +253,7 @@ function askSmarTaxAI(prompt: string, context: FilingContext): GLMResponse {
   // ============================================================================
   if (prompt.toLowerCase().includes('relief')) {
     const reliefs = context.reliefs || []
-    const reliefText = reliefs.map((r: any) => `${r.name} (RM${r.amount.toLocaleString()})`).join(', ')
+    const reliefText = reliefs.map((r: { name: string; amount: number }) => `${r.name} (RM${r.amount.toLocaleString()})`).join(', ')
     
     return {
       success: true,
@@ -265,7 +268,7 @@ function askSmarTaxAI(prompt: string, context: FilingContext): GLMResponse {
   if (prompt.toLowerCase().includes('more revenue') || prompt.toLowerCase().includes('additional income')) {
     const additionalIncome = 100000 // From prompt context
     const currentTax = context.currentTax || 0
-    const newTax = (context.grossIncome + additionalIncome - (context.deductions || 0)) * 0.24
+    const newTax = ((context.grossIncome ?? 0) + additionalIncome - (context.deductions || 0)) * 0.24
     const taxDifference = newTax - currentTax
 
     return {

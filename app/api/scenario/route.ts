@@ -2,15 +2,24 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { calculateTax } from '@/lib/tax/engine'
 
+type FilingScenarioRow = {
+  gross_income: number | null
+  ea_chargeable_income: number | null
+  calculated_tax_after_reliefs: number | null
+}
+
 export async function POST(req: NextRequest) {
   try {
     const { filingId, epfContribution, lifeInsurance, educationFee } = await req.json()
 
     const supabase = createClient()
-    const { data: filing, error } = await (supabase.from('filings') as any)
+    const { data, error } = await supabase
+      .from('filings')
       .select('gross_income, ea_chargeable_income, calculated_tax_after_reliefs')
       .eq('id', filingId)
       .single()
+
+    const filing = (data ?? null) as FilingScenarioRow | null
 
     if (error || !filing) {
       return NextResponse.json({ error: 'Filing not found' }, { status: 404 })

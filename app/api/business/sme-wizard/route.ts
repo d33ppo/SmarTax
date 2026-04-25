@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import type { Database } from '@/lib/supabase/types'
 
 type WizardAnswers = Record<string, boolean | number>
 
@@ -9,6 +10,17 @@ type BandBreakdown = {
   taxableAmount: number
   taxAmount: number
 }
+
+type FilingRow = {
+  id: string
+  mode: string | null
+  gross_income: number | null
+  total_deductions: number | null
+  answers: unknown
+  deducts: unknown
+}
+
+type FilingUpdate = Database['public']['Tables']['filings']['Update']
 
 function toNumber(value: unknown): number {
   const parsed = Number(value)
@@ -91,10 +103,13 @@ export async function POST(req: NextRequest) {
     }
 
     const supabase = createClient()
-    const { data: filing, error: filingError } = await (supabase.from('filings') as any)
+    const { data, error: filingError } = await supabase
+      .from('filings')
       .select('id, mode, gross_income, total_deductions, answers, deducts')
       .eq('id', filingId)
       .single()
+
+    const filing = (data ?? null) as FilingRow | null
 
     if (filingError || !filing) {
       return NextResponse.json({ error: 'Filing not found' }, { status: 404 })
@@ -240,8 +255,7 @@ export async function POST(req: NextRequest) {
     const existingAnswers = typeof filing.answers === 'object' && filing.answers ? filing.answers : {}
     const existingDeducts = typeof filing.deducts === 'object' && filing.deducts ? filing.deducts : {}
 
-    const { error: updateError } = await (supabase.from('filings') as any)
-      .update({
+    const filingUpdatePayload: FilingUpdate = {
         mode: 'sme',
         status: 'completed',
         answers: {
@@ -279,7 +293,16 @@ export async function POST(req: NextRequest) {
         potential_savings: potentialSavings,
         reliefs: deductibleItems,
         missed_reliefs: missedItems,
-      })
+      }
+
+    const filingsUpdate = supabase.from('filings') as unknown as {
+      update: (values: FilingUpdate) => {
+        eq: (column: string, value: string) => Promise<{ error: unknown }>
+      }
+    }
+
+    const { error: updateError } = await filingsUpdate
+      .update(filingUpdatePayload)
       .eq('id', filingId)
 
     if (updateError) {

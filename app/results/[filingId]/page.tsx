@@ -4,19 +4,41 @@ import TaxBreakdown from '@/components/tax/TaxBreakdown'
 import ReliefCard from '@/components/tax/ReliefCard'
 import ActionPlan from '@/components/tax/ActionPlan'
 import { createClient } from '@/lib/supabase/server'
+import type { Filing } from '@/types/tax'
 
 interface Props {
   params: Promise<{ filingId: string }>
+}
+
+type FilingRelief = {
+  code: string
+  name_en?: string
+  amount?: number
+  eligibilityRules?: {
+    description_en?: string
+  }
+  citation?: {
+    itaSection?: string
+    url?: string
+  }
+}
+
+type FilingResultsRow = Filing & {
+  year_of_assessment?: string | number | null
+  reliefs?: unknown
 }
 
 export default async function ResultsPage({ params }: Props) {
   const supabase = createClient()
   const resolvedParams = await params
 
-  const { data: filing, error } = await (supabase.from('filings') as any)
+  const { data, error } = await supabase
+    .from('filings')
     .select('*')
     .eq('id', resolvedParams.filingId)
     .single()
+
+  const filing = (data ?? null) as FilingResultsRow | null
 
   if (error || !filing) notFound()
 
@@ -29,8 +51,8 @@ export default async function ResultsPage({ params }: Props) {
         </div>
 
         <MissedMoneyCard
-          taxableWithout={filing.calculated_tax_before_reliefs}
-          taxableWith={filing.calculated_tax_after_reliefs}
+          taxableWithout={filing.calculated_tax_before_reliefs ?? 0}
+          taxableWith={filing.calculated_tax_after_reliefs ?? 0}
           currency="RM"
         />
 
@@ -39,11 +61,11 @@ export default async function ResultsPage({ params }: Props) {
         <div>
           <h2 className="text-xl font-bold text-gray-900 mb-4">Reliefs Applied</h2>
           <div className="space-y-3">
-            {filing.reliefs?.map((relief: any) => (
+            {(Array.isArray(filing.reliefs) ? (filing.reliefs as FilingRelief[]) : []).map((relief) => (
               <ReliefCard key={relief.code} relief={{
                 id: relief.code,
-                name: relief.name_en,
-                amount: relief.amount,
+                name: relief.name_en ?? relief.code,
+                amount: relief.amount ?? 0,
                 description: relief.eligibilityRules?.description_en || '',
                 ruling_citation: relief.citation?.itaSection || '',
                 ruling_url: relief.citation?.url || '',

@@ -4,6 +4,8 @@ import type { Database } from './types'
 
 export function createClient() {
   const cookieStore = cookies()
+  type CookieStore = Awaited<typeof cookieStore>
+  type CookieSetOptions = Parameters<CookieStore['set']>[2]
 
   return createServerClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -13,7 +15,7 @@ export function createClient() {
         async getAll() {
           return (await cookieStore).getAll()
         },
-        async setAll(cookiesToSet: any[]) {
+        async setAll(cookiesToSet: Array<{ name: string; value: string; options?: CookieSetOptions }>) {
           try {
             const store = await cookieStore
             cookiesToSet.forEach(({ name, value, options }) =>

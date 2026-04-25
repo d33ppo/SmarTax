@@ -231,7 +231,7 @@ export default function EAUploadPage() {
               <div className="bg-amber-50 p-4 rounded-2xl flex gap-3 items-start mb-8">
                 <Info className="w-5 h-5 text-amber-600 mt-0.5 shrink-0" />
                 <p className="text-xs text-amber-800 leading-relaxed font-medium">
-                  "Refer to your EA Form, enter the total main income.
+                  Refer to your EA Form, enter the total main income.
                 </p>
               </div>
 

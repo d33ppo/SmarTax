@@ -5,15 +5,35 @@ import { buildAskPrompt } from '@/lib/openai/prompts'
 import { retrieve } from '@/lib/rag/retriever'
 import { createClient } from '@/lib/supabase/server'
 
-function buildFilingContextSummary(filing: any): string {
+type FilingReliefLike = {
+  name_en?: string
+  code?: string
+  amount?: number
+}
+
+type FilingContext = {
+  id?: string
+  mode?: string
+  gross_income?: number
+  total_deductions?: number
+  total_reliefs?: number
+  taxable_income_after_reliefs?: number
+  calculated_tax_before_reliefs?: number
+  calculated_tax_after_reliefs?: number
+  potential_savings?: number
+  reliefs?: FilingReliefLike[]
+  missed_reliefs?: unknown[]
+}
+
+function buildFilingContextSummary(filing: FilingContext): string {
   const reliefs = Array.isArray(filing?.reliefs) ? filing.reliefs : []
   const missed = Array.isArray(filing?.missed_reliefs) ? filing.missed_reliefs : []
 
   const topReliefs = reliefs
     .slice()
-    .sort((a: any, b: any) => (Number(b?.amount || 0) - Number(a?.amount || 0)))
+    .sort((a, b) => Number(b?.amount || 0) - Number(a?.amount || 0))
     .slice(0, 5)
-    .map((r: any) => `${r?.name_en || r?.code || 'Unknown'}: RM ${Number(r?.amount || 0).toLocaleString()}`)
+    .map((r) => `${r?.name_en || r?.code || 'Unknown'}: RM ${Number(r?.amount || 0).toLocaleString()}`)
 
   return [
     'Current Filing Context:',
@@ -38,13 +58,14 @@ export async function POST(req: NextRequest) {
     let filingContext = ''
     if (filingId) {
       const supabase = createClient()
-      const { data: filing } = await (supabase.from('filings') as any)
+      const { data: filing } = await supabase
+        .from('filings')
         .select('id, mode, gross_income, total_deductions, total_reliefs, taxable_income_after_reliefs, calculated_tax_before_reliefs, calculated_tax_after_reliefs, potential_savings, reliefs, missed_reliefs')
         .eq('id', filingId)
         .maybeSingle()
 
       if (filing) {
-        filingContext = buildFilingContextSummary(filing)
+        filingContext = buildFilingContextSummary(filing as FilingContext)
       }
     }
 
