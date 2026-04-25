@@ -212,6 +212,7 @@ See:
 
 ```
 docs/DEMO_SCRIPT.md
+link for pitching video --> https://drive.google.com/file/d/1Ji6e1jqrQiEQKwJGwUxpScSLmA3ptNTB/view?usp=share_link
 ```
 
 Covers:
