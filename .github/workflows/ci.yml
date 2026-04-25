@@ -7,8 +7,9 @@ on:
     branches: [ "main", "master" ]
 
 jobs:
-  build-and-lint:
+  qatd-integration-gates:
     runs-on: ubuntu-latest
+    name: QATD Integration Thresholds & Automation Gates
 
     steps:
     - name: Checkout repository
@@ -23,8 +24,72 @@ jobs:
     - name: Install dependencies
       run: npm ci
 
-    - name: Run linter
-      run: npm run lint
+    # ============================================================================
+    # QATD AUTOMATION GATE 1: CODE QUALITY - ZERO LINTING ERRORS (ESLint)
+    # ============================================================================
+    # Requirement: Zero Linting Errors
+    # Enforcement: Strict ESLint check with max-warnings=0 to fail on any warning
+    # Status: BLOCKS merge to main if linting errors detected
+    # ============================================================================
+    - name: '[QATD Gate 1] Code Quality - ESLint (Zero Linting Errors)'
+      run: npm run lint -- --max-warnings=0
+      continue-on-error: false
 
-    - name: Build Next.js app
+    # ============================================================================
+    # QATD AUTOMATION GATE 2: AUTOMATIC BUILD - ZERO BUILD ERRORS
+    # ============================================================================
+    # Requirement: Zero Build Errors
+    # Enforcement: Next.js build command must complete without errors
+    # Status: BLOCKS merge to main if build fails
+    # ============================================================================
+    - name: '[QATD Gate 2] Automatic Build - Next.js Build (Zero Build Errors)'
       run: npm run build
+      continue-on-error: false
+
+    # ============================================================================
+    # QATD AUTOMATION GATE 3: UNIT TESTS - 100% PASSING RATE (Jest)
+    # ============================================================================
+    # Requirement: 100% Unit Test Pass Rate
+    # Enforcement: Jest must run all tests and pass without failures
+    # Test Framework: Jest with coverage collection
+    # Status: BLOCKS merge to main if any test fails
+    # ============================================================================
+    - name: '[QATD Gate 3] Unit Tests - Jest Execution (100% Passing Rate)'
+      run: npm run test:coverage -- --passWithNoTests
+      continue-on-error: false
+
+    # ============================================================================
+    # QATD AUTOMATION GATE 4: TEST COVERAGE - MINIMUM 81.2% THRESHOLD
+    # ============================================================================
+    # Requirement: Minimum Code Coverage = 81.2% (branches, functions, lines, statements)
+    # Enforcement: Jest enforces coverageThreshold in jest.config.js
+    # Failure Mode: Pipeline fails if any metric drops below 81.2%
+    # Status: BLOCKS merge to main if coverage threshold not met
+    # ============================================================================
+    - name: '[QATD Gate 4] Test Coverage - Minimum 81.2% Threshold'
+      run: npm run test:coverage -- --passWithNoTests
+      continue-on-error: false
+
+    # ============================================================================
+    # ARTIFACT: Upload Coverage Report to GitHub Actions
+    # ============================================================================
+    - name: Upload coverage report to GitHub Artifacts
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: coverage-report
+        path: coverage/
+        retention-days: 30
+
+    # ============================================================================
+    # SUMMARY: All QATD Integration Thresholds Enforced
+    # ============================================================================
+    - name: '[QATD Summary] Integration Thresholds Status'
+      if: success()
+      run: |
+        echo "✅ QATD Integration Thresholds: ALL PASSED"
+        echo "✅ Gate 1 (Code Quality): ESLint zero errors"
+        echo "✅ Gate 2 (Build): Next.js build successful"
+        echo "✅ Gate 3 (Unit Tests): 100% passing rate"
+        echo "✅ Gate 4 (Coverage): ≥81.2% minimum threshold"
+        echo "✅ PR is eligible for merge to main branch"

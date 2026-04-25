@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 export const dynamic = 'force-dynamic'
-import { glmClient } from '@/lib/glm/client'
-import { buildAskPrompt } from '@/lib/glm/prompts'
+import { openaiClient } from '@/lib/openai/client'
+import { buildAskPrompt } from '@/lib/openai/prompts'
 import { retrieve } from '@/lib/rag/retriever'
 import { createClient } from '@/lib/supabase/server'
 
@@ -61,7 +61,7 @@ export async function POST(req: NextRequest) {
 
     console.log("Prompt:", JSON.stringify(prompt, null, 2))
 
-    const answer = await glmClient.chat(prompt)
+    const answer = await openaiClient.chat(prompt)
 
     return NextResponse.json({ answer, citations, filingId: filingId || null })
   } catch (err) {
