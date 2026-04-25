@@ -4,6 +4,14 @@
 > SmarTax identifies every tax relief you may have overlooked — with verified LHDN-backed references.
 
 ---
+## Live Deployment URL
+https://smar-7mq643640-d33ppos-projects.vercel.app/
+
+## Pitching Video
+https://drive.google.com/file/d/1ydWIF5ZyumXA4XrhgUJ0HKfmhAmrvtV0/view?usp=drivesdk
+
+## Documentations
+SAD, PRD, QATD and Presentation slide in docs folder
 
 ## The Problem
 
@@ -178,7 +186,7 @@ components/     UI + domain components (tax/, ui/, layout/)
 lib/            Core logic (tax engine, AI, OCR, RAG)
 types/          TypeScript interfaces
 scripts/        DB seed + ingestion pipelines
-docs/           Architecture + demo scripts + **SAD, PRD, QATD pdf and Presentation slide**
+docs/           Architecture + demo scripts
 ```
 
 ---
@@ -212,7 +220,6 @@ See:
 
 ```
 docs/DEMO_SCRIPT.md
-link for pitching video --> https://drive.google.com/file/d/1Ji6e1jqrQiEQKwJGwUxpScSLmA3ptNTB/view?usp=share_link
 ```
 
 Covers:
