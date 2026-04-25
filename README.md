@@ -22,7 +22,7 @@ Upload your EA Form → answer 8 questions → see exactly how much money you mi
 
 - **Frontend**: Next.js 15 (App Router) + Tailwind CSS + shadcn/ui
 - **Backend**: Next.js API Routes (serverless)
-- **AI**: Z.AI GLM-4 Flash (primary)
+- **AI**: OpenAI GPT-4 (primary)
 - **Database**: Supabase (PostgreSQL + pgvector for RAG)
 - **Auth**: Supabase Auth
 - **PDF Processing**: pdf-parse
@@ -41,7 +41,7 @@ npm install
 
 # 2. Set up environment
 cp .env.example .env.local
-# Fill in your Supabase and GLM API keys
+# Fill in your Supabase and OpenAI API keys
 
 # 3. Seed the database
 npm run seed        # Load reliefs master list
