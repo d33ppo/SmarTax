@@ -27,6 +27,22 @@ type MissedItem = {
   description?: string
 }
 
+type FilingResultRow = {
+  calculated_tax_before_reliefs: number | null
+  calculated_tax_after_reliefs: number | null
+  potential_savings: number | null
+  answers: unknown
+  reliefs: unknown
+  missed_reliefs: unknown
+}
+
+type SmeQualification = {
+  paidUpCapital?: number
+  grossIncome?: number
+  foreignOwnershipPct?: number
+  isSmeRateEligible?: boolean
+}
+
 function formatNumber(value: unknown): string {
   const n = Number(value)
   const safe = Number.isFinite(n) ? n : 0
@@ -37,16 +53,18 @@ export default async function BusinessResultsPage({ params }: Props) {
   const resolved = await params
   const supabase = createClient()
 
-  const { data: filing, error } = await supabase
+  const { data, error } = await supabase
     .from('filings')
     .select('*')
     .eq('id', resolved.filingId)
     .single()
 
+  const filing = (data ?? null) as FilingResultRow | null
+
   if (error || !filing) notFound()
 
   const answers = (filing.answers ?? {}) as Record<string, unknown>
-  const qualification = answers?.smeQualification ?? {}
+  const qualification = (answers.smeQualification ?? {}) as SmeQualification
   const bandBreakdown: SmeBand[] = Array.isArray(answers?.smeTaxBandBreakdown)
     ? (answers.smeTaxBandBreakdown as SmeBand[])
     : []

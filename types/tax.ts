@@ -2,6 +2,8 @@ export interface Filing {
   id: string
   user_id: string | null
   gross_income: number | null
+  epf_employee?: number | null
+  socso?: number | null
   total_reliefs: number
   total_deductions: number | null
   ea_chargeable_income: number | null   // looks truncated, probably ea_chargeable_income

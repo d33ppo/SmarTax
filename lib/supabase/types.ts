@@ -171,6 +171,7 @@ export type Database = {
           gross_income: number | null
           id: string
           missed_reliefs: Json | null
+          mode: string | null
           potential_savings: number | null
           reliefs: Json | null
           status: string | null
@@ -190,6 +191,7 @@ export type Database = {
           gross_income?: number | null
           id?: string
           missed_reliefs?: Json | null
+          mode?: string | null
           potential_savings?: number | null
           reliefs?: Json | null
           status?: string | null
@@ -209,6 +211,7 @@ export type Database = {
           gross_income?: number | null
           id?: string
           missed_reliefs?: Json | null
+          mode?: string | null
           potential_savings?: number | null
           reliefs?: Json | null
           status?: string | null
