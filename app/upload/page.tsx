@@ -2,12 +2,12 @@
 
 import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
-import { 
-  User, 
-  Banknote, 
-  Coins, 
-  Gift, 
-  ShieldCheck, 
+import {
+  User,
+  Banknote,
+  Coins,
+  Gift,
+  ShieldCheck,
   CreditCard,
   ChevronRight,
   ChevronLeft,
@@ -19,6 +19,7 @@ import {
 } from 'lucide-react'
 import { log } from '@/lib/log'
 import { calculateTax } from '@/lib/tax/engine'
+import { EA_FORM_FIELDS, EAFormField } from './EAFormFields'
 
 export default function EAUploadPage() {
   const router = useRouter()
@@ -34,12 +35,16 @@ export default function EAUploadPage() {
   const [grossSalary, setGrossSalary] = useState<number | ''>('')
   const [bonus, setBonus] = useState<number | ''>('')
   const [allowances, setAllowances] = useState<number | ''>('')
+  const [taxPaidByEmployer, setTaxPaidByEmployer] = useState<number | ''>('')
   const [esos, setEsos] = useState<number | ''>('')
   const [gratuity, setGratuity] = useState<number | ''>('')
   const [arrears, setArrears] = useState<number | ''>('')
   const [bik, setBik] = useState<number | ''>('')
   const [accommodation, setAccommodation] = useState<number | ''>('')
   const [refund, setRefund] = useState<number | ''>('')
+  const [compensation, setCompensation] = useState<number | ''>('')
+  const [pension, setPension] = useState<number | ''>('')
+  const [annuities, setAnnuities] = useState<number | ''>('')
   const [epf, setEpf] = useState<number | ''>('')
   const [socso, setSocso] = useState<number | ''>('')
   const [donations, setDonations] = useState<number | ''>('')
@@ -54,9 +59,9 @@ export default function EAUploadPage() {
 
   // Calculations
   const totalIncome = useMemo(() => {
-    return (Number(grossSalary) || 0) + (Number(bonus) || 0) + (Number(allowances) || 0) + 
-           (Number(esos) || 0) + (Number(gratuity) || 0) + (Number(arrears) || 0) + 
-           (Number(bik) || 0) + (Number(accommodation) || 0) + (Number(refund) || 0)
+    return (Number(grossSalary) || 0) + (Number(bonus) || 0) + (Number(allowances) || 0) +
+      (Number(esos) || 0) + (Number(gratuity) || 0) + (Number(arrears) || 0) +
+      (Number(bik) || 0) + (Number(accommodation) || 0) + (Number(refund) || 0)
   }, [grossSalary, bonus, allowances, esos, gratuity, arrears, bik, accommodation, refund])
 
   const totalDeductions = useMemo(() => {
@@ -78,11 +83,11 @@ export default function EAUploadPage() {
     try {
       // Calculate tax based on chargeable income
       const taxBeforeDeductions = calculateTax(chargeableIncome)
-      
+
       // Statutory payments
-      const statutoryTotal = (Number(mtd) || 0) + (Number(cp38) || 0) + 
-                            (Number(zakatSalary) || 0) + (Number(zakatOther) || 0)
-      
+      const statutoryTotal = (Number(mtd) || 0) + (Number(cp38) || 0) +
+        (Number(zakatSalary) || 0) + (Number(zakatOther) || 0)
+
       const taxPayable = Math.max(0, taxBeforeDeductions - statutoryTotal)
 
       const payload = {
@@ -98,11 +103,11 @@ export default function EAUploadPage() {
           socsoClaim: Math.min(Number(socso) || 0, 350),
           donationClaim: Number(donations) || 0,
         },
-        deducts: { 
-          pcb: Number(mtd) || 0, 
-          cp38: Number(cp38) || 0, 
-          zakatPayroll: Number(zakatSalary) || 0, 
-          zakatOther: Number(zakatOther) || 0 
+        deducts: {
+          pcb: Number(mtd) || 0,
+          cp38: Number(cp38) || 0,
+          zakatPayroll: Number(zakatSalary) || 0,
+          zakatOther: Number(zakatOther) || 0
         },
       }
 
@@ -137,13 +142,13 @@ export default function EAUploadPage() {
           </div>
           <h2 className="text-2xl font-black text-slate-900 mb-2">Calculation Complete!</h2>
           <p className="text-slate-500 text-sm mb-8">Estimated tax AFTER PCB deduction (before individual reliefs).</p>
-          
+
           <div className="bg-slate-50 rounded-3xl p-8 mb-8">
             <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Tax Payable</p>
             <p className="text-5xl font-black text-slate-900">{formatRM(calculatedTax)}</p>
           </div>
 
-          <button 
+          <button
             onClick={() => router.push(`/wizard?filingId=${filingId}`)}
             className="w-full bg-blue-600 text-white py-4 rounded-2xl font-black text-lg shadow-xl shadow-blue-200 hover:bg-blue-700 transition flex items-center justify-center gap-2"
           >
@@ -173,7 +178,7 @@ export default function EAUploadPage() {
 
       <div className="max-w-4xl mx-auto px-6 py-10 grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-6">
-          
+
           {/* STEP 1: Personal Info */}
           {step === 1 && (
             <div className="bg-white rounded-3xl p-8 shadow-sm border border-slate-100 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -190,8 +195,8 @@ export default function EAUploadPage() {
               <div className="space-y-6">
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-slate-700 ml-1">Full Name</label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="As per NRIC / Passport"
@@ -200,8 +205,8 @@ export default function EAUploadPage() {
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-slate-700 ml-1">IC / Passport No.</label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     value={ic}
                     onChange={(e) => setIc(e.target.value)}
                     placeholder="98010101xxxx"
@@ -228,17 +233,17 @@ export default function EAUploadPage() {
               <div className="bg-amber-50 p-4 rounded-2xl flex gap-3 items-start mb-8">
                 <Info className="w-5 h-5 text-amber-600 mt-0.5 shrink-0" />
                 <p className="text-xs text-amber-800 leading-relaxed font-medium">
-                  Rujuk Borang EA anda (CP8A), masukkan jumlah pendapatan utama.
+                  "Refer to your EA Form, enter the total main income.
                 </p>
               </div>
 
               <div className="space-y-8">
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700 ml-1">Gross Salary (Gaji Kasar)</label>
+                  <label className="text-sm font-bold text-slate-700 ml-1">Gross Salary</label>
                   <div className="relative">
                     <span className="absolute left-6 top-1/2 -translate-y-1/2 font-bold text-slate-400">RM</span>
-                    <input 
-                      type="number" 
+                    <input
+                      type="number"
                       value={grossSalary}
                       onChange={(e) => setGrossSalary(e.target.value === '' ? '' : Number(e.target.value))}
                       className="w-full pl-16 pr-6 py-5 rounded-2xl border-4 border-slate-50 bg-slate-50 focus:bg-white focus:border-blue-500 transition-all outline-none text-3xl font-black text-slate-900"
@@ -249,8 +254,8 @@ export default function EAUploadPage() {
                   <label className="text-sm font-bold text-slate-700 ml-1">Bonus / Fees</label>
                   <div className="relative">
                     <span className="absolute left-6 top-1/2 -translate-y-1/2 font-bold text-slate-400">RM</span>
-                    <input 
-                      type="number" 
+                    <input
+                      type="number"
                       value={bonus}
                       onChange={(e) => setBonus(e.target.value === '' ? '' : Number(e.target.value))}
                       className="w-full pl-16 pr-6 py-5 rounded-2xl border-2 border-slate-50 bg-slate-50 focus:bg-white focus:border-blue-500 transition-all outline-none text-2xl font-bold"
@@ -274,11 +279,11 @@ export default function EAUploadPage() {
                 </div>
               </div>
 
-              <button 
+              <button
                 onClick={() => setShowAddIncome(!showAddIncome)}
                 className="w-full flex items-center justify-between p-6 rounded-2xl border-2 border-dashed border-slate-100 text-slate-500 hover:border-blue-200 hover:text-blue-600 transition"
               >
-                <span className="font-bold">Pendapatan Tambahan (Jika Ada)</span>
+                <span className="font-bold">Additional Income (If Any)</span>
                 {showAddIncome ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
               </button>
 
@@ -286,14 +291,15 @@ export default function EAUploadPage() {
                 <div className="mt-8 space-y-6 animate-in slide-in-from-top-4">
                   {[
                     { label: 'Allowances', value: allowances, setter: setAllowances },
+                    { label: 'Tax Paid by Employer', value: taxPaidByEmployer, setter: setTaxPaidByEmployer },
                     { label: 'ESOS Benefit', value: esos, setter: setEsos },
                     { label: 'Gratuity', value: gratuity, setter: setGratuity },
                     { label: 'Arrears (Previous Years)', value: arrears, setter: setArrears },
                   ].map((field, i) => (
                     <div key={i} className="space-y-2">
                       <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">{field.label}</label>
-                      <input 
-                        type="number" 
+                      <input
+                        type="number"
                         value={field.value}
                         onChange={(e) => field.setter(e.target.value === '' ? '' : Number(e.target.value))}
                         className="w-full px-6 py-4 rounded-2xl border-2 border-slate-100 outline-none focus:border-blue-500 font-bold"
@@ -318,11 +324,11 @@ export default function EAUploadPage() {
                 </div>
               </div>
 
-              <button 
+              <button
                 onClick={() => setShowBenefits(!showBenefits)}
                 className="w-full flex items-center justify-between p-6 rounded-2xl border-2 border-dashed border-slate-100 text-slate-500 hover:border-purple-200 hover:text-purple-600 transition"
               >
-                <span className="font-bold">Manfaat & Kemudahan (Jika Ada)</span>
+                <span className="font-bold">Benefits & Perquisites (If Any)</span>
                 {showBenefits ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
               </button>
 
@@ -332,11 +338,14 @@ export default function EAUploadPage() {
                     { label: 'Benefits in Kind', value: bik, setter: setBik },
                     { label: 'Accommodation Value', value: accommodation, setter: setAccommodation },
                     { label: 'Refund (Unapproved Fund)', value: refund, setter: setRefund },
+                    { label: 'Compensation (Loss of Job)', value: compensation, setter: setCompensation },
+                    { label: 'Pension', value: pension, setter: setPension },
+                    { label: 'Annuities', value: annuities, setter: setAnnuities },
                   ].map((field, i) => (
                     <div key={i} className="space-y-2">
                       <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">{field.label}</label>
-                      <input 
-                        type="number" 
+                      <input
+                        type="number"
                         value={field.value}
                         onChange={(e) => field.setter(e.target.value === '' ? '' : Number(e.target.value))}
                         className="w-full px-6 py-4 rounded-2xl border-2 border-slate-100 outline-none focus:border-purple-500 font-bold"
@@ -371,8 +380,8 @@ export default function EAUploadPage() {
                     <label className="text-sm font-bold text-slate-700 ml-1">{field.label}</label>
                     <div className="relative">
                       <span className="absolute left-6 top-1/2 -translate-y-1/2 font-bold text-slate-400">RM</span>
-                      <input 
-                        type="number" 
+                      <input
+                        type="number"
                         value={field.value}
                         onChange={(e) => field.setter(e.target.value === '' ? '' : Number(e.target.value))}
                         className="w-full pl-16 pr-6 py-4 rounded-2xl border-2 border-slate-50 bg-slate-50 focus:bg-white focus:border-blue-500 transition-all outline-none text-xl font-bold"
@@ -402,8 +411,8 @@ export default function EAUploadPage() {
                   <label className="text-sm font-bold text-slate-700 ml-1">MTD (PCB) Deduction</label>
                   <div className="relative">
                     <span className="absolute left-6 top-1/2 -translate-y-1/2 font-bold text-slate-400">RM</span>
-                    <input 
-                      type="number" 
+                    <input
+                      type="number"
                       value={mtd}
                       onChange={(e) => setMtd(e.target.value === '' ? '' : Number(e.target.value))}
                       className="w-full pl-16 pr-6 py-5 rounded-2xl border-4 border-slate-50 bg-slate-50 focus:bg-white focus:border-rose-500 transition-all outline-none text-3xl font-black text-rose-900"
@@ -413,8 +422,8 @@ export default function EAUploadPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">CP38 Deduction</label>
-                    <input 
-                      type="number" 
+                    <input
+                      type="number"
                       value={cp38}
                       onChange={(e) => setCp38(e.target.value === '' ? '' : Number(e.target.value))}
                       className="w-full px-6 py-4 rounded-2xl border-2 border-slate-100 outline-none focus:border-rose-500 font-bold"
@@ -422,8 +431,8 @@ export default function EAUploadPage() {
                   </div>
                   <div className="space-y-2">
                     <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Zakat (Salary)</label>
-                    <input 
-                      type="number" 
+                    <input
+                      type="number"
                       value={zakatSalary}
                       onChange={(e) => setZakatSalary(e.target.value === '' ? '' : Number(e.target.value))}
                       className="w-full px-6 py-4 rounded-2xl border-2 border-slate-100 outline-none focus:border-rose-500 font-bold"
@@ -432,8 +441,8 @@ export default function EAUploadPage() {
                 </div>
                 <div className="space-y-2">
                   <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Zakat (Other)</label>
-                  <input 
-                    type="number" 
+                  <input
+                    type="number"
                     value={zakatOther}
                     onChange={(e) => setZakatOther(e.target.value === '' ? '' : Number(e.target.value))}
                     className="w-full px-6 py-4 rounded-2xl border-2 border-slate-100 outline-none focus:border-rose-500 font-bold"
@@ -447,7 +456,7 @@ export default function EAUploadPage() {
           {/* Navigation Controls */}
           <div className="mt-10 flex gap-4">
             {step > 1 && (
-              <button 
+              <button
                 onClick={prevStep}
                 disabled={submitting}
                 className="flex-1 bg-white border-2 border-slate-100 text-slate-500 py-4 rounded-2xl font-black flex items-center justify-center gap-2 hover:bg-slate-50 transition active:scale-95 disabled:opacity-50"
@@ -456,19 +465,19 @@ export default function EAUploadPage() {
               </button>
             )}
             {step < 6 ? (
-              <button 
+              <button
                 onClick={nextStep}
                 className="flex-[2] bg-slate-900 text-white py-4 rounded-2xl font-black text-lg flex items-center justify-center gap-2 hover:bg-slate-800 transition shadow-xl shadow-slate-200 active:scale-95"
               >
                 Continue <ChevronRight className="w-6 h-6" />
               </button>
             ) : (
-              <button 
+              <button
                 onClick={handleSubmit}
                 disabled={submitting}
                 className="flex-[2] bg-blue-600 text-white py-4 rounded-2xl font-black text-lg flex items-center justify-center gap-2 hover:bg-blue-700 transition shadow-xl shadow-blue-200 active:scale-95 disabled:opacity-50"
               >
-                {submitting ? 'Calculating...' : 'Calculate My Tax'} 
+                {submitting ? 'Calculating...' : 'Calculate My Tax'}
                 {!submitting && <Calculator className="w-6 h-6" />}
               </button>
             )}
@@ -479,9 +488,9 @@ export default function EAUploadPage() {
         <aside className="lg:col-span-1">
           <div className="sticky top-32 bg-slate-900 rounded-[2.5rem] p-8 shadow-2xl shadow-slate-300 text-white overflow-hidden relative">
             <div className="absolute -top-24 -right-24 w-48 h-48 bg-blue-500/20 rounded-full blur-3xl" />
-            
+
             <h3 className="text-slate-400 font-bold text-xs uppercase tracking-widest mb-8">Summary Panel</h3>
-            
+
             <div className="space-y-6 mb-12">
               <div className="flex justify-between items-center border-b border-slate-800 pb-4">
                 <span className="text-slate-400 text-sm">Total Income</span>
@@ -503,10 +512,10 @@ export default function EAUploadPage() {
                 <span>Values based on current input</span>
               </div>
             </div>
-            
+
             <div className="mt-8 pt-8 border-t border-slate-800">
               <p className="text-xs text-slate-500 italic leading-relaxed text-center">
-                &quot;Ambil nilai dari Borang EA (CP8A) anda untuk ketepatan maksimum.&quot;
+                &quot;Take the value from your EA Form (CP8A) for maximum accuracy&quot;
               </p>
             </div>
           </div>

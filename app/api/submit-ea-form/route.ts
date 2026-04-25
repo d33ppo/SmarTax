@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
                 gross_income: body.grossIncome,
                 total_reliefs: body.totalRelief,
                 total_deductions: body.totalDeductions,
-                ea_chargeable_income: body.eaChargeableIncome,
+                taxable_income_before_reliefs: body.eaChargeableIncome,
                 calculated_tax_before_reliefs: body.calculatedTaxBeforeDeductions,
                 calculated_tax_after_reliefs: body.calculatedTaxAfterDeductions,
                 reliefs: body.reliefs,
