@@ -1,6 +1,6 @@
-'use client'
+﻿'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 
 interface Message {
@@ -9,7 +9,7 @@ interface Message {
   citations?: string[]
 }
 
-export default function ChatPage() {
+function ChatContent() {
   const searchParams = useSearchParams()
   const filingId = searchParams.get('filingId')
   const [messages, setMessages] = useState<Message[]>([
@@ -17,7 +17,7 @@ export default function ChatPage() {
       role: 'assistant',
       content: filingId
         ? 'Hi! I\'m SmarTax. I can see your current filing context and explain your tax outcome with LHDN-based reasoning.'
-        : 'Hi! I\'m SmarTax. Ask me anything about Malaysian personal tax — I\'ll always cite the relevant LHDN ruling.',
+        : 'Hi! I\'m SmarTax. Ask me anything about Malaysian personal tax ? I\'ll always cite the relevant LHDN ruling.',
     },
   ])
   const [input, setInput] = useState('')
@@ -125,3 +125,12 @@ export default function ChatPage() {
     </div>
   )
 }
+
+export default function ChatPage() {
+  return (
+    <Suspense fallback={<div>Loading chat...</div>}>
+      <ChatContent />
+    </Suspense>
+  )
+}
+
