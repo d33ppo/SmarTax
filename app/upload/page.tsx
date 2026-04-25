@@ -17,9 +17,7 @@ import {
   CheckCircle2,
   Calculator
 } from 'lucide-react'
-import { log } from '@/lib/log'
 import { calculateTax } from '@/lib/tax/engine'
-import { EA_FORM_FIELDS, EAFormField } from './EAFormFields'
 
 export default function EAUploadPage() {
   const router = useRouter()
@@ -486,35 +484,35 @@ export default function EAUploadPage() {
 
         {/* STICKY SUMMARY PANEL */}
         <aside className="lg:col-span-1">
-          <div className="sticky top-32 bg-slate-900 rounded-[2.5rem] p-8 shadow-2xl shadow-slate-300 text-white overflow-hidden relative">
-            <div className="absolute -top-24 -right-24 w-48 h-48 bg-blue-500/20 rounded-full blur-3xl" />
+          <div className="sticky top-32 bg-slate-900 rounded-[2.5rem] p-4 sm:p-6 lg:p-8 shadow-2xl shadow-slate-300 text-white overflow-hidden relative transform transition-all duration-300 hover:scale-[1.02] hover:shadow-3xl">
+            <div className="absolute -top-24 -right-24 w-32 h-32 sm:w-48 sm:h-48 bg-blue-500/20 rounded-full blur-3xl" />
 
-            <h3 className="text-slate-400 font-bold text-xs uppercase tracking-widest mb-8">Summary Panel</h3>
+            <h3 className="text-slate-400 font-bold text-xs uppercase tracking-widest mb-6 sm:mb-8">Summary Panel</h3>
 
-            <div className="space-y-6 mb-12">
-              <div className="flex justify-between items-center border-b border-slate-800 pb-4">
-                <span className="text-slate-400 text-sm">Total Income</span>
-                <span className="font-bold text-lg">{formatRM(totalIncome)}</span>
+            <div className="space-y-4 sm:space-y-6 mb-8 sm:mb-12">
+              <div className="flex justify-between items-center border-b border-slate-800 pb-3 sm:pb-4">
+                <span className="text-slate-400 text-xs sm:text-sm">Total Income</span>
+                <span className="font-bold text-base sm:text-lg">{formatRM(totalIncome)}</span>
               </div>
-              <div className="flex justify-between items-center border-b border-slate-800 pb-4">
-                <span className="text-slate-400 text-sm">Total Deductions</span>
-                <span className="font-bold text-lg text-rose-400">- {formatRM(totalDeductions)}</span>
+              <div className="flex justify-between items-center border-b border-slate-800 pb-3 sm:pb-4">
+                <span className="text-slate-400 text-xs sm:text-sm">Total Deductions</span>
+                <span className="font-bold text-base sm:text-lg text-rose-400">- {formatRM(totalDeductions)}</span>
               </div>
             </div>
 
-            <div className="bg-white/10 rounded-3xl p-6 border border-white/5 backdrop-blur-sm">
-              <p className="text-slate-400 text-xs font-bold uppercase mb-2 tracking-tighter">Est. Chargeable Income</p>
-              <p className="text-4xl font-black text-blue-400">
+            <div className="bg-white/10 rounded-2xl sm:rounded-3xl p-4 sm:p-6 border border-white/5 backdrop-blur-sm">
+              <p className="text-slate-400 text-[10px] sm:text-xs font-bold uppercase mb-2 tracking-tighter">Est. Chargeable Income</p>
+              <p className="text-2xl sm:text-3xl lg:text-4xl font-black text-blue-400 break-words">
                 {formatRM(chargeableIncome)}
               </p>
-              <div className="mt-4 flex items-center gap-2 text-[10px] text-slate-500 uppercase font-bold tracking-widest">
-                <Info className="w-3.5 h-3.5" />
-                <span>Values based on current input</span>
+              <div className="mt-3 sm:mt-4 flex items-center gap-2 text-[9px] sm:text-[10px] text-slate-500 uppercase font-bold tracking-widest">
+                <Info className="w-3 h-3 sm:w-3.5 sm:h-3.5 flex-shrink-0" />
+                <span className="leading-tight">Values based on current input</span>
               </div>
             </div>
 
-            <div className="mt-8 pt-8 border-t border-slate-800">
-              <p className="text-xs text-slate-500 italic leading-relaxed text-center">
+            <div className="mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-slate-800">
+              <p className="text-[10px] sm:text-xs text-slate-500 italic leading-relaxed text-center px-2">
                 &quot;Take the value from your EA Form (CP8A) for maximum accuracy&quot;
               </p>
             </div>

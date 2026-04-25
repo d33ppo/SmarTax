@@ -1,6 +1,6 @@
 import pdfParse from 'pdf-parse'
-import { glmClient } from '@/lib/glm/client'
-import { buildExtractEAPrompt } from '@/lib/glm/prompts'
+import { openaiClient } from '@/lib/openai/client'
+import { buildExtractEAPrompt } from '@/lib/openai/prompts'
 
 type ExtractionMethod = 'pdf-text' | 'pdf-text+ocr-fallback' | 'ocr-image' | 'ocr-pdf'
 
@@ -206,7 +206,7 @@ export async function parseEAForm(buffer: Buffer, options: ParseEAOptions = {}):
   }
 
   const messages = buildExtractEAPrompt({ text })
-  const response = await glmClient.chat(messages)
+  const response = await openaiClient.chat(messages)
 
   let data: Partial<EAData> = {}
   const jsonMatch = response.match(/\{[\s\S]*\}/)
