@@ -5,7 +5,7 @@
 
 ---
 
-## 🚨 The Problem
+## The Problem
 
 Malaysian taxpayers leave an estimated **RM 2.3 billion** in unclaimed reliefs every year.
 
@@ -16,11 +16,11 @@ but because:
 - Eligibility conditions are complex and hard to interpret
 - Manual calculation is tedious and error-prone
 
-👉 The average taxpayer claims only **4 out of 18+ available reliefs**
+The average taxpayer claims only **4 out of 18+ available reliefs**
 
 ---
 
-## 🧠 What SmarTax Does
+## What SmarTax Does
 
 SmarTax turns tax relief discovery into a **structured, guided assessment system**:
 
@@ -30,14 +30,14 @@ Input tax details → Complete guided checks → Receive verified assessment
 
 ### Output includes:
 
-- ✅ Eligible tax reliefs identified
-- 💰 Estimated tax savings
-- 📚 Direct LHDN citations for each claim
-- 🔍 Clear explanation of eligibility logic
+- Eligible tax reliefs identified
+- Estimated tax savings
+- Direct LHDN citations for each claim
+- Clear explanation of eligibility logic
 
 ---
 
-## 👥 Built for Real Taxpayer Scenarios
+## Built for Real Taxpayer Scenarios
 
 | Persona                  | Challenge                       | SmarTax Solution                             |
 | ------------------------ | ------------------------------- | -------------------------------------------- |
@@ -47,16 +47,16 @@ Input tax details → Complete guided checks → Receive verified assessment
 
 ---
 
-## ⚙️ Core System Design
+## Core System Design
 
 ### 1. Hybrid Intelligence Architecture
 
 SmarTax separates:
 
-- 🧠 **AI (discovery layer)** → identifies potential reliefs
-- 🧮 **Tax Engine (calculation layer)** → computes exact values
+- **AI (discovery layer)** → identifies potential reliefs
+- **Tax Engine (calculation layer)** → computes exact values
 
-👉 No hallucinated numbers. Fully explainable outputs.
+No hallucinated numbers. Fully explainable outputs.
 
 ---
 
@@ -67,7 +67,7 @@ SmarTax separates:
   - exact source reference
   - contextual explanation
 
-👉 Results are **traceable and verifiable**
+Results are **traceable and verifiable**
 
 ---
 
@@ -91,9 +91,9 @@ Assessment Output (UI)
 
 ---
 
-## ✨ Key Features
+## Key Features
 
-### 💡 Missed Money Detection
+### Missed Money Detection
 
 Instantly highlights:
 
@@ -101,7 +101,7 @@ Instantly highlights:
 
 ---
 
-### 📚 Citation-Backed Results
+### Citation-Backed Results
 
 - Each relief links to LHDN guidance
 - No black-box outputs
@@ -109,28 +109,28 @@ Instantly highlights:
 
 ---
 
-### 🧪 Scenario Simulator
+### Scenario Simulator
 
 - “What if I increase EPF contribution?”
 - Real-time tax savings delta
 
 ---
 
-### 🌐 Bilingual Support
+### Bilingual Support
 
 - Bahasa Malaysia 🇲🇾
 - English 🇬🇧
 
 ---
 
-### 📱 Progressive Web App (PWA)
+### Progressive Web App (PWA)
 
 - Installable on mobile
 - Optimized for tax season use
 
 ---
 
-## 🧱 Tech Stack
+## Tech Stack
 
 ### Frontend
 
@@ -170,7 +170,7 @@ Instantly highlights:
 
 ---
 
-## 🗂️ Project Structure
+## Project Structure
 
 ```
 app/            Next.js App Router pages + API routes
@@ -178,12 +178,12 @@ components/     UI + domain components (tax/, ui/, layout/)
 lib/            Core logic (tax engine, AI, OCR, RAG)
 types/          TypeScript interfaces
 scripts/        DB seed + ingestion pipelines
-docs/           Architecture + demo scripts
+docs/           Architecture + demo scripts + **SAD, PRD and QATD pdf**
 ```
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ```bash
 # Install dependencies
@@ -202,11 +202,11 @@ npm run dev
 ```
 
 Open:
-👉 http://localhost:3000
+http://localhost:3000
 
 ---
 
-## 🧪 Demo Flow (5 Minutes)
+## Demo Flow (5 Minutes)
 
 See:
 
@@ -223,7 +223,7 @@ Covers:
 
 ---
 
-## 🏗️ System Architecture Summary
+## System Architecture Summary
 
 | Layer          | Responsibility                        |
 | -------------- | ------------------------------------- |
@@ -236,7 +236,7 @@ Covers:
 
 ---
 
-## 🎯 Design Principles
+## Design Principles
 
 - Clarity over complexity
 - Deterministic over guesswork
@@ -245,13 +245,13 @@ Covers:
 
 ---
 
-## 👨‍💻 Team
+## Team
 
 Built at **UMH Hackathon 2026**
 
 ---
 
-## 📌 Vision
+## Vision
 
 To become Malaysia’s **default tax intelligence layer**,
 where every taxpayer can clearly understand:
