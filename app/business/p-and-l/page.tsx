@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import { useRouter } from 'next/navigation'
 import { 
   ChevronDown, 
   ChevronUp, 
@@ -29,6 +30,7 @@ const SUGGESTED_CATEGORIES = [
 ]
 
 export default function BusinessPLPage() {
+  const router = useRouter()
   // Basic Info
   const [nama, setNama] = useState('')
   const [namaPerniagaan, setNamaPerniagaan] = useState('')
@@ -62,6 +64,9 @@ export default function BusinessPLPage() {
   const [expenses, setExpenses] = useState<ExpenseRow[]>([
     { id: '1', category: 'Sewa', amount: 0 }
   ])
+  const [isSaving, setIsSaving] = useState(false)
+  const [saveMessage, setSaveMessage] = useState('')
+  const [saveError, setSaveError] = useState('')
 
   // Calculations
   const jualanBersih = useMemo(() => Math.max(0, jualanKasar - pulanganJualan), [jualanKasar, pulanganJualan])
@@ -93,6 +98,70 @@ export default function BusinessPLPage() {
     setExpenses(expenses.map(e => e.id === id ? { ...e, [field]: value } : e))
   }
 
+  const handleSave = async () => {
+    try {
+      setIsSaving(true)
+      setSaveMessage('')
+      setSaveError('')
+
+      const payload = {
+        basicInfo: {
+          nama,
+          namaPerniagaan,
+          tahunTaksiran,
+          tempohMula,
+          tempohTamat,
+        },
+        lhdnInfo: {
+          noCukai,
+          noReg,
+          kodBiz,
+        },
+        income: {
+          jualanKasar,
+          pulanganJualan,
+          jualanBersih,
+          komisen,
+          diskaun,
+        },
+        cogs: {
+          stokAwal,
+          belian,
+          pulanganBelian,
+          kosPenghantaran,
+          stokAkhir,
+          kosBarangJualan,
+          untungKasar,
+        },
+        expenses,
+        totals: {
+          jumlahPerbelanjaan,
+          untungBersih,
+        },
+      }
+
+      const response = await fetch('/api/business/p-and-l', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      })
+
+      const result = await response.json()
+      if (!response.ok) {
+        throw new Error(result?.error || 'Gagal simpan maklumat')
+      }
+
+      setSaveMessage(`Berjaya disimpan. Filing ID: ${result.filingId}`)
+      router.push(`/business/wizard?filingId=${result.filingId}`)
+    } catch (err) {
+      setSaveError(err instanceof Error ? err.message : 'Gagal simpan maklumat')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-[#F8FAFC] pb-24">
       {/* Header */}
@@ -107,9 +176,17 @@ export default function BusinessPLPage() {
               <p className="text-sm text-slate-500">Business Income Analysis (Borang B)</p>
             </div>
           </div>
-          <button className="bg-blue-600 text-white px-5 py-2.5 rounded-xl font-semibold hover:bg-blue-700 transition shadow-lg shadow-blue-200">
-            Simpan Maklumat
-          </button>
+          <div className="flex flex-col items-end gap-1">
+            <button
+              onClick={handleSave}
+              disabled={isSaving}
+              className="bg-blue-600 text-white px-5 py-2.5 rounded-xl font-semibold hover:bg-blue-700 transition shadow-lg shadow-blue-200 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {isSaving ? 'Menyimpan...' : 'Simpan Maklumat'}
+            </button>
+            {saveMessage ? <p className="text-xs font-semibold text-emerald-600">{saveMessage}</p> : null}
+            {saveError ? <p className="text-xs font-semibold text-rose-600">{saveError}</p> : null}
+          </div>
         </div>
       </header>
 
