@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo, ElementType } from 'react'
+import { useRouter } from 'next/navigation'
 import {
   User,
   Briefcase,
@@ -17,7 +18,8 @@ import {
   Calculator,
   Gift,
   CreditCard,
-  Percent
+  Percent,
+  Loader
 } from 'lucide-react'
 import { calculateTax } from '@/lib/tax/engine'
 import { REBATES, applyRebates } from '@/lib/tax/rebates'
@@ -134,7 +136,9 @@ const RELIEF_AMOUNTS = {
 }
 
 export default function FreelanceInvoicesPage() {
+  const router = useRouter()
   const [step, setStep] = useState(1)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   // Step 1: Maklumat Diri
   const [name, setName] = useState('')
@@ -435,6 +439,71 @@ export default function FreelanceInvoicesPage() {
 
   const nextStep = () => setStep(s => Math.min(s + 1, 8))
   const prevStep = () => setStep(s => Math.max(s - 1, 1))
+
+  const handleSubmitBorangB = async () => {
+    setIsSubmitting(true)
+    try {
+      // Store borang B data in sessionStorage for the wizard to access
+      const borangBData = {
+        grossBusinessIncome,
+        openingStock,
+        purchases,
+        closingStock,
+        otherBusinessIncome,
+        expenseLoanInterest,
+        expenseSalariesWages,
+        expenseRentalLease,
+        expenseContracts,
+        expenseCommissions,
+        expenseBadDebts,
+        expenseTravelTransport,
+        expenseRepairsMaintenance,
+        expensePromotionAds,
+        expenseOthers,
+        nonAllowableExpenses,
+        capitalAllowanceCurrentYear,
+        capitalAllowanceBroughtFwd,
+        businessLossBroughtFwd,
+        businessLossCurrentYear,
+        employmentIncome,
+        rentalIncome,
+        interestRoyaltiesOther,
+        foreignIncomeReceived,
+        angelInvestorDeduction,
+        qualifyingProspectingExp,
+        name,
+        ic,
+        year,
+      }
+      
+      sessionStorage.setItem('borangBData', JSON.stringify(borangBData))
+      
+      // Submit to API to create a filing entry
+      const res = await fetch('/api/submit-ea-form', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          grossIncome: aggregateIncome,
+          totalRelief: totalReliefs,
+          totalDeductions: totalAllowableExpenses,
+          eaChargeableIncome: chargeableIncome,
+          calculatedTaxBeforeDeductions: grossTax,
+          calculatedTaxAfterDeductions: taxPayable,
+          reliefs: { totalReliefs },
+          deducts: { totalDeductions: totalAllowableExpenses },
+        }),
+      })
+      
+      const result = await res.json()
+      const filingId = result.filingId
+      
+      // Redirect to wizard with filingId
+      router.push(`/wizard?filingId=${filingId}`)
+    } catch (error) {
+      console.error('Error submitting Borang B:', error)
+      setIsSubmitting(false)
+    }
+  }
 
   const formatRM = (val: number | '') => {
     const num = typeof val === 'number' ? val : (val === '' ? 0 : Number(val))
@@ -1236,7 +1305,8 @@ export default function FreelanceInvoicesPage() {
           {step > 1 && (
             <button
               onClick={prevStep}
-              className="flex-1 bg-white border-2 border-slate-100 text-slate-500 py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-slate-50 transition"
+              disabled={isSubmitting}
+              className="flex-1 bg-white border-2 border-slate-100 text-slate-500 py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-slate-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <ChevronLeft className="w-5 h-5" /> Back
             </button>
@@ -1244,10 +1314,37 @@ export default function FreelanceInvoicesPage() {
           {step < 8 && (
             <button
               onClick={nextStep}
-              className="flex-[2] bg-slate-900 text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-slate-800 transition"
+              disabled={isSubmitting}
+              className="flex-[2] bg-slate-900 text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-slate-800 transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Continue <ChevronRight className="w-5 h-5" />
             </button>
+          )}
+          {step === 8 && (
+            <>
+              <button
+                onClick={prevStep}
+                disabled={isSubmitting}
+                className="flex-1 bg-white border-2 border-slate-100 text-slate-500 py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-slate-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <ChevronLeft className="w-5 h-5" /> Back
+              </button>
+              <button
+                onClick={handleSubmitBorangB}
+                disabled={isSubmitting}
+                className="flex-[2] bg-emerald-600 text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-emerald-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader className="w-5 h-5 animate-spin" /> Proceeding...
+                  </>
+                ) : (
+                  <>
+                    Answer Relief Questions <ChevronRight className="w-5 h-5" />
+                  </>
+                )}
+              </button>
+            </>
           )}
         </div>
       </main>
