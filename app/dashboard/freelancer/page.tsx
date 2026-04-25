@@ -21,23 +21,23 @@ export default function FreelancerDashboardPage() {
 
         <div className="space-y-4">
           <Link
-            href="/wizard"
+            href="/freelance/invoices"
             className="flex items-center justify-between bg-white border-2 border-purple-200 rounded-xl p-5 hover:bg-purple-50 transition"
           >
             <div>
-              <p className="font-semibold text-gray-900">Step 1 — Declare Income Sources</p>
-              <p className="text-sm text-gray-500 mt-0.5">Guided wizard for freelance / gig income</p>
+              <p className="font-semibold text-gray-900">Step 1 — Upload Invoices / Receipts</p>
+              <p className="text-sm text-gray-500 mt-0.5">Enter your income and deductible expenses</p>
             </div>
             <span className="text-purple-600 font-bold">→</span>
           </Link>
 
           <Link
-            href="/freelance/invoices"
+            href="/wizard"
             className="flex items-center justify-between bg-white border border-gray-200 rounded-xl p-5 hover:bg-gray-50 transition"
           >
             <div>
-              <p className="font-semibold text-gray-900">Step 2 — Upload Invoices / Receipts</p>
-              <p className="text-sm text-gray-500 mt-0.5">We&apos;ll extract deductible expenses automatically</p>
+              <p className="font-semibold text-gray-900">Step 2 — Complete Eligibility Checks</p>
+              <p className="text-sm text-gray-500 mt-0.5">Answer guided questions about reliefs and deductions</p>
             </div>
             <span className="text-gray-400 font-bold">→</span>
           </Link>
